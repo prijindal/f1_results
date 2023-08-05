@@ -12,5 +12,6 @@ void main() async {
         (e) => ResultsRace.fromJson(e as Map<String, dynamic>),
       )
       .toList();
+  // ignore: avoid_print
   print(races.length);
 }
