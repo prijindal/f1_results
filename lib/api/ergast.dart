@@ -81,6 +81,17 @@ Future<List<ResultsRace>> fetchResults(String season) async {
   return list;
 }
 
+Future<List<ResultsRace>> fetchSprintResults(String season) async {
+  final Response<dynamic> response =
+      await dio.get("$rootApi/$season/sprint.json?limit=1000");
+  final list = (response.data["MRData"]["RaceTable"]["Races"] as List<dynamic>)
+      .map(
+        (e) => ResultsRace.fromJson(e as Map<String, dynamic>),
+      )
+      .toList();
+  return list;
+}
+
 Future<List<QualifyingResult>> fetchQualifyingResults(
     String season, String round) async {
   final Response<dynamic> response =

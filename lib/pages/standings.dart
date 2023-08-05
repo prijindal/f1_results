@@ -58,11 +58,16 @@ class _StandingsListState extends State<StandingsList> {
   }
 
   Future<void> _fetchSeries() async {
-    final results = await fetchResults(widget.season);
+    final mainResults = await fetchResults(widget.season);
+    final sprintResults = await fetchSprintResults(widget.season);
+    final List<ResultsRace> results = [
+      ...mainResults,
+      ...sprintResults,
+    ];
     final Map<String, ConstructorStanding> constructorStandings = {};
     final Map<String, DriverStanding> driverStandings = {};
     for (var race in results) {
-      for (var result in race.results) {
+      for (var result in race.allResults) {
         final constructor = result.constructor;
         final driver = result.driver;
         if (constructorStandings[constructor.constructorId] == null) {
@@ -80,7 +85,7 @@ class _StandingsListState extends State<StandingsList> {
     }
     for (var race in results) {
       if (widget.selectedDate.compareTo(stringToDate(race.date)) >= 0) {
-        for (var result in race.results) {
+        for (var result in race.allResults) {
           constructorStandings[result.constructor.constructorId]?.points +=
               double.parse(result.points);
           driverStandings[result.driver.driverId]?.points +=

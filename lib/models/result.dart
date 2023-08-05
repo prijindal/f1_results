@@ -117,10 +117,10 @@ class Time {
 }
 
 class FastestLap {
-  final String rank;
-  final String lap;
-  final Time time;
-  final AverageSpeed averageSpeed;
+  final String? rank;
+  final String? lap;
+  final Time? time;
+  final AverageSpeed? averageSpeed;
 
   FastestLap({
     required this.rank,
@@ -131,11 +131,14 @@ class FastestLap {
 
   factory FastestLap.fromJson(Map<String, dynamic> json) {
     return FastestLap(
-      rank: json['rank'] as String,
-      lap: json['lap'] as String,
-      time: Time.fromJson(json['Time'] as Map<String, dynamic>),
-      averageSpeed:
-          AverageSpeed.fromJson(json['AverageSpeed'] as Map<String, dynamic>),
+      rank: json['rank'] == null ? null : json['rank'] as String,
+      lap: json['lap'] == null ? null : json['lap'] as String,
+      time: json['Time'] == null
+          ? null
+          : Time.fromJson(json['Time'] as Map<String, dynamic>),
+      averageSpeed: json['AverageSpeed'] == null
+          ? null
+          : AverageSpeed.fromJson(json['AverageSpeed'] as Map<String, dynamic>),
     );
   }
 }
@@ -247,7 +250,19 @@ class Race {
 }
 
 class ResultsRace extends Race {
-  List<RaceResult> results;
+  List<RaceResult>? results;
+  List<RaceResult>? sprintResults;
+
+  List<RaceResult> get allResults {
+    final List<RaceResult> allResults = [];
+    if (results != null) {
+      allResults.addAll(results!);
+    }
+    if (sprintResults != null) {
+      allResults.addAll(sprintResults!);
+    }
+    return allResults;
+  }
 
   ResultsRace({
     required String season,
@@ -258,6 +273,7 @@ class ResultsRace extends Race {
     required String date,
     required String? time,
     required this.results,
+    required this.sprintResults,
   }) : super(
           season: season,
           round: round,
@@ -277,9 +293,18 @@ class ResultsRace extends Race {
       circuit: RaceCircuit.fromJson(json['Circuit'] as Map<String, dynamic>),
       date: json['date'] as String,
       time: json['time'] == null ? null : json['time'] as String,
-      results: (json['Results'] as List<dynamic>)
-          .map((result) => RaceResult.fromJson(result as Map<String, dynamic>))
-          .toList(),
+      results: json['Results'] == null
+          ? null
+          : (json['Results'] as List<dynamic>)
+              .map((result) =>
+                  RaceResult.fromJson(result as Map<String, dynamic>))
+              .toList(),
+      sprintResults: json['SprintResults'] == null
+          ? null
+          : (json['SprintResults'] as List<dynamic>)
+              .map((result) =>
+                  RaceResult.fromJson(result as Map<String, dynamic>))
+              .toList(),
     );
   }
 }
