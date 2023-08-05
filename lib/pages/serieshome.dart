@@ -84,7 +84,12 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
   }
 
   List<DateTime> get selectableDates {
-    return races.map((a) => a["date"] as String).map(stringToDate).toList();
+    final dates =
+        races.map((a) => a["date"] as String).map(stringToDate).toList();
+    if (dates.isNotEmpty) {
+      dates.add(dates.first.copyWith(day: dates.first.day - 7));
+    }
+    return dates..sort((a, b) => a.compareTo(b));
   }
 
   @override
