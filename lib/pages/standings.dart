@@ -3,12 +3,25 @@ import 'package:flutter/material.dart';
 import '../api/ergast.dart';
 import '../models/result.dart';
 
-class Standing<T> {
-  final T data;
+class DriverStanding {
+  final Driver driver;
+  final Constructor constructor;
   double points;
 
-  Standing({
-    required this.data,
+  DriverStanding({
+    required this.driver,
+    required this.constructor,
+    this.points = 0.0,
+  });
+}
+
+class ConstructorStanding {
+  final Constructor constructor;
+
+  double points;
+
+  ConstructorStanding({
+    required this.constructor,
     this.points = 0.0,
   });
 }
@@ -35,8 +48,8 @@ class StandingsList extends StatefulWidget {
 }
 
 class _StandingsListState extends State<StandingsList> {
-  List<Standing<Constructor>> constructorStandings = [];
-  List<Standing<Driver>> driverStandings = [];
+  List<ConstructorStanding> constructorStandings = [];
+  List<DriverStanding> driverStandings = [];
 
   @override
   initState() {
@@ -46,21 +59,21 @@ class _StandingsListState extends State<StandingsList> {
 
   Future<void> _fetchSeries() async {
     final results = await fetchResults(widget.season);
-    final Map<String, Standing<Constructor>> constructorStandings = {};
-    final Map<String, Standing<Driver>> driverStandings = {};
+    final Map<String, ConstructorStanding> constructorStandings = {};
+    final Map<String, DriverStanding> driverStandings = {};
     for (var race in results) {
       for (var result in race.results) {
         final constructor = result.constructor;
         final driver = result.driver;
         if (constructorStandings[constructor.constructorId] == null) {
-          constructorStandings[constructor.constructorId] =
-              Standing<Constructor>(
-            data: constructor,
+          constructorStandings[constructor.constructorId] = ConstructorStanding(
+            constructor: constructor,
           );
         }
         if (driverStandings[driver.driverId] == null) {
-          driverStandings[driver.driverId] = Standing<Driver>(
-            data: driver,
+          driverStandings[driver.driverId] = DriverStanding(
+            driver: driver,
+            constructor: constructor,
           );
         }
       }
@@ -92,7 +105,7 @@ class _StandingsListState extends State<StandingsList> {
       itemCount: constructorStandings.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(constructorStandings[index].data.name),
+          title: Text(constructorStandings[index].constructor.name),
           trailing: Text(constructorStandings[index].points.toString()),
           onTap: () {},
         );
@@ -105,7 +118,8 @@ class _StandingsListState extends State<StandingsList> {
       itemCount: driverStandings.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(driverStandings[index].data.givenName),
+          title: Text(driverStandings[index].driver.givenName),
+          subtitle: Text(driverStandings[index].constructor.name),
           trailing: Text(driverStandings[index].points.toString()),
           onTap: () {},
         );

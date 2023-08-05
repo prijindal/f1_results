@@ -45,7 +45,7 @@ class RaceResult {
 class Driver {
   final String driverId;
   final String? permanentNumber;
-  final String code;
+  final String? code;
   final String url;
   final String givenName;
   final String familyName;
@@ -69,7 +69,7 @@ class Driver {
       permanentNumber: json['permanentNumber'] == null
           ? null
           : json['permanentNumber'] as String,
-      code: json['code'] as String,
+      code: json['code'] == null ? null : json['code'] as String,
       url: json['url'] as String,
       givenName: json['givenName'] as String,
       familyName: json['familyName'] as String,
@@ -184,7 +184,7 @@ class ResultsRace {
   String raceName;
   RaceCircuit circuit;
   String date;
-  String time;
+  String? time;
   List<RaceResult> results;
 
   ResultsRace({
@@ -206,7 +206,7 @@ class ResultsRace {
       raceName: json['raceName'] as String,
       circuit: RaceCircuit.fromJson(json['Circuit'] as Map<String, dynamic>),
       date: json['date'] as String,
-      time: json['time'] as String,
+      time: json['time'] == null ? null : json['time'] as String,
       results: (json['Results'] as List<dynamic>)
           .map((result) => RaceResult.fromJson(result as Map<String, dynamic>))
           .toList(),
