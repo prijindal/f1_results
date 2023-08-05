@@ -44,7 +44,7 @@ class RaceResult {
 
 class Driver {
   final String driverId;
-  final String permanentNumber;
+  final String? permanentNumber;
   final String code;
   final String url;
   final String givenName;
@@ -66,7 +66,9 @@ class Driver {
   factory Driver.fromJson(Map<String, dynamic> json) {
     return Driver(
       driverId: json['driverId'] as String,
-      permanentNumber: json['permanentNumber'] as String,
+      permanentNumber: json['permanentNumber'] == null
+          ? null
+          : json['permanentNumber'] as String,
       code: json['code'] as String,
       url: json['url'] as String,
       givenName: json['givenName'] as String,

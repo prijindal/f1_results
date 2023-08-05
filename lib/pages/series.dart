@@ -17,6 +17,7 @@ class _SeriesListPageState extends State<SeriesListPage> {
   initState() {
     super.initState();
     _fetchSeries();
+    initCache();
   }
 
   Future<void> _fetchSeries() async {
