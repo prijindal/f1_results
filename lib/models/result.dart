@@ -177,7 +177,44 @@ class RaceCircuit {
   }
 }
 
-class ResultsRace {
+class QualifyingResult {
+  final String number;
+  final String position;
+  final Driver driver;
+  final Constructor constructor;
+  final String? q1;
+  final String? q2;
+  final String? q3;
+
+  String get bestTime {
+    return q3 ?? q2 ?? q1 ?? "NA";
+  }
+
+  QualifyingResult({
+    required this.number,
+    required this.position,
+    required this.driver,
+    required this.constructor,
+    required this.q1,
+    required this.q2,
+    required this.q3,
+  });
+
+  factory QualifyingResult.fromJson(Map<String, dynamic> json) {
+    return QualifyingResult(
+      number: json['number'] as String,
+      position: json['position'] as String,
+      driver: Driver.fromJson(json['Driver'] as Map<String, dynamic>),
+      constructor:
+          Constructor.fromJson(json['Constructor'] as Map<String, dynamic>),
+      q1: json['Q1'] == null ? null : json['Q1'] as String,
+      q2: json['Q2'] == null ? null : json['Q2'] as String,
+      q3: json['Q3'] == null ? null : json['Q3'] as String,
+    );
+  }
+}
+
+class Race {
   String season;
   String round;
   String url;
@@ -185,9 +222,8 @@ class ResultsRace {
   RaceCircuit circuit;
   String date;
   String? time;
-  List<RaceResult> results;
 
-  ResultsRace({
+  Race({
     required this.season,
     required this.round,
     required this.url,
@@ -195,8 +231,42 @@ class ResultsRace {
     required this.circuit,
     required this.date,
     required this.time,
-    required this.results,
   });
+
+  factory Race.fromJson(Map<String, dynamic> json) {
+    return Race(
+      season: json['season'] as String,
+      round: json['round'] as String,
+      url: json['url'] as String,
+      raceName: json['raceName'] as String,
+      circuit: RaceCircuit.fromJson(json['Circuit'] as Map<String, dynamic>),
+      date: json['date'] as String,
+      time: json['time'] == null ? null : json['time'] as String,
+    );
+  }
+}
+
+class ResultsRace extends Race {
+  List<RaceResult> results;
+
+  ResultsRace({
+    required String season,
+    required String round,
+    required String url,
+    required String raceName,
+    required RaceCircuit circuit,
+    required String date,
+    required String? time,
+    required this.results,
+  }) : super(
+          season: season,
+          round: round,
+          url: url,
+          raceName: raceName,
+          circuit: circuit,
+          date: date,
+          time: time,
+        );
 
   factory ResultsRace.fromJson(Map<String, dynamic> json) {
     return ResultsRace(

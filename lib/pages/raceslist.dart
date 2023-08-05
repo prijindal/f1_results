@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/result.dart';
+import 'race.dart';
 
 class RacesList extends StatefulWidget {
   const RacesList({
@@ -11,7 +12,7 @@ class RacesList extends StatefulWidget {
   });
 
   final String season;
-  final List<dynamic> races;
+  final List<Race> races;
   final DateTime selectedDate;
 
   @override
@@ -25,12 +26,21 @@ class _RacesListState extends State<RacesList> {
       itemCount: widget.races.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(widget.races[index]["raceName"] as String),
-          subtitle: Text(widget.races[index]["date"] as String),
-          enabled: widget.selectedDate.compareTo(
-                  stringToDate(widget.races[index]["date"] as String)) >=
+          title: Text(widget.races[index].raceName),
+          subtitle: Text(widget.races[index].date),
+          enabled: widget.selectedDate
+                  .compareTo(stringToDate(widget.races[index].date)) >=
               0,
-          // onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => RacePage(
+                  season: widget.season,
+                  race: widget.races[index],
+                ),
+              ),
+            );
+          },
         );
       },
     );

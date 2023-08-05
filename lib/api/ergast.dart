@@ -61,11 +61,12 @@ Future<List<String>> fetchSeries() async {
   return list.reversed.toList();
 }
 
-Future<List<dynamic>> fetchRaces(String season) async {
+Future<List<Race>> fetchRaces(String season) async {
   final Response<dynamic> response =
       await dio.get("$rootApi/$season.json?limit=1000");
-  final list =
-      (response.data["MRData"]["RaceTable"]["Races"] as List<dynamic>).toList();
+  final list = (response.data["MRData"]["RaceTable"]["Races"] as List<dynamic>)
+      .map((e) => Race.fromJson(e as Map<String, dynamic>))
+      .toList();
   return list;
 }
 
@@ -78,4 +79,33 @@ Future<List<ResultsRace>> fetchResults(String season) async {
       )
       .toList();
   return list;
+}
+
+Future<List<QualifyingResult>> fetchQualifyingResults(
+    String season, String round) async {
+  final Response<dynamic> response =
+      await dio.get("$rootApi/$season/$round/qualifying.json?limit=1000");
+  final list =
+      (response.data["MRData"]["RaceTable"]["Races"] as List<dynamic>).toList();
+  if (list.isNotEmpty) {
+    final qualifyingResult = list.first["QualifyingResults"] as List<dynamic>;
+    return qualifyingResult
+        .map((e) => QualifyingResult.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+  return [];
+}
+
+Future<List<RaceResult>> fetchRaceResult(String season, String round) async {
+  final Response<dynamic> response =
+      await dio.get("$rootApi/$season/$round/results.json?limit=1000");
+  final list =
+      (response.data["MRData"]["RaceTable"]["Races"] as List<dynamic>).toList();
+  if (list.isNotEmpty) {
+    final result = list.first["Results"] as List<dynamic>;
+    return result
+        .map((e) => RaceResult.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+  return [];
 }

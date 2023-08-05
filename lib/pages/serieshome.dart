@@ -18,16 +18,16 @@ class SeriesHomePage extends StatefulWidget {
 class _SeriesHomePageState extends State<SeriesHomePage> {
   DateTime? _selectedDate;
   int _selectedIndex = 0;
-  List<dynamic> races = [];
+  List<Race> races = [];
 
   @override
   initState() {
     super.initState();
     _loadSelectedDate();
-    _fetchSeries();
+    _fetchRaces();
   }
 
-  Future<void> _fetchSeries() async {
+  Future<void> _fetchRaces() async {
     final races = await fetchRaces(widget.season);
     setState(() {
       this.races = races;
@@ -84,8 +84,7 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
   }
 
   List<DateTime> get selectableDates {
-    final dates =
-        races.map((a) => a["date"] as String).map(stringToDate).toList();
+    final dates = races.map((a) => a.date).map(stringToDate).toList();
     if (dates.isNotEmpty) {
       dates.add(dates.first.copyWith(day: dates.first.day - 7));
     }
