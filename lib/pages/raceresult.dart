@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../api/ergast.dart';
 import '../models/result.dart';
 
 class RaceResultList extends StatefulWidget {
@@ -8,10 +7,13 @@ class RaceResultList extends StatefulWidget {
     super.key,
     required this.season,
     required this.race,
+    required this.fetchRaceResult,
   });
 
   final String season;
   final Race race;
+  final Future<List<RaceResult>> Function(String season, String round)
+      fetchRaceResult;
 
   @override
   State<RaceResultList> createState() => RaceResultListState();
@@ -27,7 +29,8 @@ class RaceResultListState extends State<RaceResultList> {
   }
 
   Future<void> _fetchRaceResult() async {
-    final raceResults = await fetchRaceResult(widget.season, widget.race.round);
+    final raceResults =
+        await widget.fetchRaceResult(widget.season, widget.race.round);
     setState(() {
       this.raceResults = raceResults;
     });

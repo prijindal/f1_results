@@ -217,6 +217,23 @@ class QualifyingResult {
   }
 }
 
+class Session {
+  String? date;
+  String? time;
+
+  Session({
+    required this.date,
+    required this.time,
+  });
+
+  factory Session.fromJson(Map<String, dynamic> json) {
+    return Session(
+      date: json['date'] == null ? null : json['date'] as String,
+      time: json['time'] == null ? null : json['time'] as String,
+    );
+  }
+}
+
 class Race {
   String season;
   String round;
@@ -225,6 +242,7 @@ class Race {
   RaceCircuit circuit;
   String date;
   String? time;
+  Session? sprint;
 
   Race({
     required this.season,
@@ -234,6 +252,7 @@ class Race {
     required this.circuit,
     required this.date,
     required this.time,
+    required this.sprint,
   });
 
   factory Race.fromJson(Map<String, dynamic> json) {
@@ -245,6 +264,9 @@ class Race {
       circuit: RaceCircuit.fromJson(json['Circuit'] as Map<String, dynamic>),
       date: json['date'] as String,
       time: json['time'] == null ? null : json['time'] as String,
+      sprint: json['Sprint'] == null
+          ? null
+          : Session.fromJson(json["Sprint"] as Map<String, dynamic>),
     );
   }
 }
@@ -272,6 +294,7 @@ class ResultsRace extends Race {
     required RaceCircuit circuit,
     required String date,
     required String? time,
+    required Session? sprint,
     required this.results,
     required this.sprintResults,
   }) : super(
@@ -282,6 +305,7 @@ class ResultsRace extends Race {
           circuit: circuit,
           date: date,
           time: time,
+          sprint: sprint,
         );
 
   factory ResultsRace.fromJson(Map<String, dynamic> json) {
@@ -305,6 +329,9 @@ class ResultsRace extends Race {
               .map((result) =>
                   RaceResult.fromJson(result as Map<String, dynamic>))
               .toList(),
+      sprint: json['Sprint'] == null
+          ? null
+          : Session.fromJson(json["Sprint"] as Map<String, dynamic>),
     );
   }
 }

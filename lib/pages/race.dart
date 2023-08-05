@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../api/ergast.dart';
 import '../models/result.dart';
 import 'qualifying.dart';
 import 'raceresult.dart';
@@ -22,16 +23,31 @@ class _RacePageState extends State<RacePage> {
   int _selectedIndex = 0;
 
   List<Widget> get _widgetOptions {
-    return <Widget>[
+    final widgets = <Widget>[
       QualifyingList(
         season: widget.season,
         race: widget.race,
       ),
+    ];
+    if (widget.race.sprint != null) {
+      widgets.add(
+        RaceResultList(
+          key: Key("${widget.season}-${widget.race.round}-sprint"),
+          season: widget.season,
+          race: widget.race,
+          fetchRaceResult: fetchSprintResult,
+        ),
+      );
+    }
+    widgets.add(
       RaceResultList(
+        key: Key("${widget.season}-${widget.race.round}-race"),
         season: widget.season,
         race: widget.race,
-      )
-    ];
+        fetchRaceResult: fetchRaceResult,
+      ),
+    );
+    return widgets;
   }
 
   @override
@@ -42,12 +58,17 @@ class _RacePageState extends State<RacePage> {
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
             icon: Icon(Icons.flag_outlined),
             label: 'Qualifying',
           ),
-          BottomNavigationBarItem(
+          if (widget.race.sprint != null)
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.flag_circle),
+              label: 'Sprint',
+            ),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.flag_circle),
             label: 'Results',
           ),
