@@ -19,11 +19,16 @@ enum StandingType {
 }
 
 class StandingsList extends StatefulWidget {
-  const StandingsList(
-      {super.key, required this.season, required this.standingType});
+  const StandingsList({
+    super.key,
+    required this.season,
+    required this.standingType,
+    required this.selectedDate,
+  });
 
   final String season;
   final StandingType standingType;
+  final DateTime selectedDate;
 
   @override
   State<StandingsList> createState() => _StandingsListState();
@@ -44,23 +49,26 @@ class _StandingsListState extends State<StandingsList> {
     final Map<String, Standing<Constructor>> constructorStandings = {};
     final Map<String, Standing<Driver>> driverStandings = {};
     for (var race in results) {
-      for (var result in race.results) {
-        final constructor = result.constructor;
-        final driver = result.driver;
-        if (constructorStandings[constructor.constructorId] == null) {
-          constructorStandings[constructor.constructorId] =
-              Standing<Constructor>(
-            data: constructor,
-          );
+      if (widget.selectedDate.compareTo(stringToDate(race.date)) >= 0) {
+        for (var result in race.results) {
+          final constructor = result.constructor;
+          final driver = result.driver;
+          if (constructorStandings[constructor.constructorId] == null) {
+            constructorStandings[constructor.constructorId] =
+                Standing<Constructor>(
+              data: constructor,
+            );
+          }
+          if (driverStandings[driver.driverId] == null) {
+            driverStandings[driver.driverId] = Standing<Driver>(
+              data: driver,
+            );
+          }
+          constructorStandings[constructor.constructorId]?.points +=
+              double.parse(result.points);
+          driverStandings[driver.driverId]?.points +=
+              double.parse(result.points);
         }
-        if (driverStandings[driver.driverId] == null) {
-          driverStandings[driver.driverId] = Standing<Driver>(
-            data: driver,
-          );
-        }
-        constructorStandings[constructor.constructorId]?.points +=
-            double.parse(result.points);
-        driverStandings[driver.driverId]?.points += double.parse(result.points);
       }
     }
     setState(() {

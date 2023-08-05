@@ -1,48 +1,35 @@
 import 'package:flutter/material.dart';
 
-import '../api/ergast.dart';
+import '../models/result.dart';
 
 class RacesList extends StatefulWidget {
-  const RacesList({super.key, required this.season});
+  const RacesList({
+    super.key,
+    required this.season,
+    required this.races,
+    required this.selectedDate,
+  });
 
   final String season;
+  final List<dynamic> races;
+  final DateTime selectedDate;
 
   @override
   State<RacesList> createState() => _RacesListState();
 }
 
 class _RacesListState extends State<RacesList> {
-  List<dynamic> races = [];
-
-  @override
-  initState() {
-    super.initState();
-    _fetchSeries();
-  }
-
-  Future<void> _fetchSeries() async {
-    final races = await fetchRaces(widget.season);
-    setState(() {
-      this.races = races;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: races.length,
+      itemCount: widget.races.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(races[index]["raceName"] as String),
-          onTap: () {
-            // Navigator.of(context).push(
-            //   MaterialPageRoute<void>(
-            //     builder: (BuildContext context) => SeriesHomePage(
-            //       season: seasons[index],
-            //     ),
-            //   ),
-            // );
-          },
+          title: Text(widget.races[index]["raceName"] as String),
+          enabled: widget.selectedDate.compareTo(
+                  stringToDate(widget.races[index]["date"] as String)) >=
+              0,
+          // onTap: () {},
         );
       },
     );

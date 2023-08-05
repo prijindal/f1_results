@@ -211,3 +211,8 @@ class ResultsRace {
     );
   }
 }
+
+DateTime stringToDate(String e) {
+  final split = e.split("-").map((a) => int.parse(a)).toList();
+  return DateTime(split[0], split[1], split[2]);
+}
