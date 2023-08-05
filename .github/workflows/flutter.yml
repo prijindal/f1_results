@@ -164,9 +164,9 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-      # - run: flutter build windows --release
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: windows
-      #     path: build/windows
-      #     retention-days: 1
+      - run: flutter build windows --release
+      - uses: actions/upload-artifact@v3
+        with:
+          name: windows
+          path: build/windows
+          retention-days: 1
