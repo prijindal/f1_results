@@ -26,6 +26,7 @@ class _RacesListState extends State<RacesList> {
       itemBuilder: (context, index) {
         return ListTile(
           title: Text(widget.races[index]["raceName"] as String),
+          subtitle: Text(widget.races[index]["date"] as String),
           enabled: widget.selectedDate.compareTo(
                   stringToDate(widget.races[index]["date"] as String)) >=
               0,
