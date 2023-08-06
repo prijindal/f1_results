@@ -50,6 +50,10 @@ class RaceResultListState extends State<RaceResultList> {
             itemCount: raceResults.length,
             itemBuilder: (context, index) {
               return ListTile(
+                leading: Text(
+                  (index + 1).toString(),
+                  style: const TextStyle(fontSize: 30),
+                ),
                 title: DriverName(
                   driver: raceResults[index].driver,
                   constructor: raceResults[index].constructor,

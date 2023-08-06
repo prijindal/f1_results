@@ -115,6 +115,10 @@ class _StandingsListState extends State<StandingsList> {
       itemCount: constructorStandings.length,
       itemBuilder: (context, index) {
         return ListTile(
+          leading: Text(
+            (index + 1).toString(),
+            style: const TextStyle(fontSize: 30),
+          ),
           title: Text(constructorStandings[index].constructor.name),
           trailing: Text(constructorStandings[index].points.toString()),
         );
@@ -127,6 +131,10 @@ class _StandingsListState extends State<StandingsList> {
       itemCount: driverStandings.length,
       itemBuilder: (context, index) {
         return ListTile(
+          leading: Text(
+            (index + 1).toString(),
+            style: const TextStyle(fontSize: 30),
+          ),
           title: Text(
               "${driverStandings[index].driver.givenName} ${driverStandings[index].driver.familyName}"),
           subtitle: Text(driverStandings[index].constructor.name),

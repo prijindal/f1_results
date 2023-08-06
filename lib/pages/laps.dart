@@ -155,12 +155,12 @@ class RaceLapsViewState extends State<RaceLapsView> {
     return null;
   }
 
-  int _getPosition(String driverId) {
+  int? _getPosition(String driverId) {
     final timing = _getLastTiming(driverId);
     if (timing != null) {
       return timing.position;
     }
-    return 999;
+    return null;
   }
 
   Timing? _getLastTiming(String driverId) {
@@ -178,7 +178,11 @@ class RaceLapsViewState extends State<RaceLapsView> {
   int _getPositionFromStart(String driverId) {
     final qResult = qualifyingResults
         .singleWhere((element) => element.driver.driverId == driverId);
-    return qResult.position - _getPosition(driverId);
+    final position = _getPosition(driverId);
+    if (position != null) {
+      return qResult.position - position;
+    }
+    return 0;
   }
 
   String _lastLapTiming(String driverId) {
@@ -207,8 +211,12 @@ class RaceLapsViewState extends State<RaceLapsView> {
         lastLapA.number != lastLapB.number) {
       return (-lastLapA.number).compareTo(-(lastLapB.number));
     }
-    return _getPosition(a.driver.driverId)
-        .compareTo(_getPosition(b.driver.driverId));
+    final positionA = _getPosition(a.driver.driverId);
+    final positionB = _getPosition(b.driver.driverId);
+    if (positionA != null && positionB != null) {
+      return positionA.compareTo(positionB);
+    }
+    return a.position.compareTo(b.position);
   }
 
   String durationToText(Duration diff) {
@@ -237,14 +245,6 @@ class RaceLapsViewState extends State<RaceLapsView> {
                 itemBuilder: (context, index) {
                   final qResult =
                       (qualifyingResults..sort(_positionCompare))[index];
-                  if (currentLap == 0) {
-                    return ListTile(
-                      title: DriverName(
-                        constructor: qResult.constructor,
-                        driver: qResult.driver,
-                      ),
-                    );
-                  }
                   String timingText = "";
                   int diffPositionFromStart =
                       _getPositionFromStart(qResult.driver.driverId);
