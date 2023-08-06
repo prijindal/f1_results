@@ -55,7 +55,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
         final driverId = laps[k].timings[i].driverId;
         // calculate time of all drivers
         DateTime totalTime = DateTime(int.parse(widget.season));
-        for (var j = 0; j < k; j++) {
+        for (var j = 0; j <= k; j++) {
           final time = laps[j]
               .timings
               .singleWhere((element) => element.driverId == driverId)
@@ -92,7 +92,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
     }
     return Column(
       children: [
-        if (laps.length > currentLap)
+        if (laps.length >= currentLap && currentLap >= 1)
           Flexible(
             child: SingleChildScrollView(
               child: ListView.builder(
@@ -160,6 +160,9 @@ class RaceLapsViewState extends State<RaceLapsView> {
             ),
             IconButton(
               onPressed: () {
+                if (currentLap <= 1) {
+                  return;
+                }
                 setState(() {
                   currentLap = currentLap - 1;
                 });
@@ -182,6 +185,9 @@ class RaceLapsViewState extends State<RaceLapsView> {
             ),
             IconButton(
               onPressed: () {
+                if (currentLap >= laps.length) {
+                  return;
+                }
                 setState(() {
                   currentLap = currentLap + 1;
                 });
