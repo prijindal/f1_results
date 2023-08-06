@@ -158,10 +158,9 @@ class RaceLapsViewState extends State<RaceLapsView> {
                           int.parse(a.lap) < currentLap)
                       .map((e) => e.lap)
                       .join(",");
-                  int diffPositionFromStart = 0;
                   final startPosition = qResult.position;
-                  diffPositionFromStart =
-                      int.parse(timing.position!) - int.parse(startPosition);
+                  int diffPositionFromStart =
+                      int.parse(startPosition) - int.parse(timing.position!);
                   return ListTile(
                     title: DriverName(
                       constructor: qResult.constructor,
