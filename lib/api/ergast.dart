@@ -148,3 +148,17 @@ Future<List<RaceLap>> fetchLaps(String season, String round) async {
   }
   return [];
 }
+
+Future<List<PitStop>> fetchPitStops(String season, String round) async {
+  final Response<dynamic> response =
+      await dio.get("$rootApi/$season/$round/pitstops.json?limit=2000");
+  final list =
+      (response.data["MRData"]["RaceTable"]["Races"] as List<dynamic>).toList();
+  if (list.isNotEmpty) {
+    final result = list.first["PitStops"] as List<dynamic>;
+    return result
+        .map((e) => PitStop.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+  return [];
+}

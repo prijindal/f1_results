@@ -378,6 +378,32 @@ class Timing {
   }
 }
 
+class PitStop {
+  String driverId;
+  String lap;
+  String stop;
+  String time;
+  String duration;
+
+  PitStop({
+    required this.driverId,
+    required this.lap,
+    required this.stop,
+    required this.time,
+    required this.duration,
+  });
+
+  factory PitStop.fromJson(Map<String, dynamic> json) {
+    return PitStop(
+      driverId: json["driverId"] as String,
+      lap: json["lap"] as String,
+      stop: json["stop"] as String,
+      time: json["time"] as String,
+      duration: json["duration"] as String,
+    );
+  }
+}
+
 DateTime stringToDate(String e) {
   final split = e.split("-").map((a) => int.parse(a)).toList();
   return DateTime(split[0], split[1], split[2]);
