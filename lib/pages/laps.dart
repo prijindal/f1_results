@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/ergast.dart';
+import '../components/drivername.dart';
 import '../models/result.dart';
 
 class RaceLapsView extends StatefulWidget {
@@ -18,18 +19,28 @@ class RaceLapsView extends StatefulWidget {
 }
 
 class RaceLapsViewState extends State<RaceLapsView> {
+  List<QualifyingResult> qualifyingResults = [];
   List<RaceLap> laps = [];
   List<PitStop> pitstops = [];
   // cumulativeLapTimes will store in format {"lap3": {"driver1": "3.33.333"}}
   // this means that driver1 has taken 3:33 minutes to complete from lap 0 to lap 3
   Map<String, Map<String, DateTime>> cumulativeLapTimes = {};
-  int currentLap = 1;
+  int currentLap = 0;
 
   @override
   initState() {
     super.initState();
+    _fetchQualifyingResults();
     _fetchLaps();
     _fetchPitStops();
+  }
+
+  Future<void> _fetchQualifyingResults() async {
+    final qualifyingResults =
+        await fetchQualifyingResults(widget.season, widget.race.round);
+    setState(() {
+      this.qualifyingResults = qualifyingResults;
+    });
   }
 
   Future<void> _fetchLaps() async {
@@ -92,14 +103,29 @@ class RaceLapsViewState extends State<RaceLapsView> {
     }
     return Column(
       children: [
-        if (laps.length >= currentLap && currentLap >= 1)
+        if (laps.length >= currentLap &&
+            currentLap >= 0 &&
+            qualifyingResults.isNotEmpty)
           Flexible(
             child: SingleChildScrollView(
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: laps[currentLap - 1].timings.length,
+                itemCount: currentLap == 0
+                    ? qualifyingResults.length
+                    : laps[currentLap - 1].timings.length,
                 itemBuilder: (context, index) {
+                  if (currentLap == 0) {
+                    final qResult = qualifyingResults[index];
+                    return ListTile(
+                      title: DriverName(
+                        constructor: qResult.constructor,
+                        driver: qResult.driver,
+                      ),
+                    );
+                  }
                   final timing = laps[currentLap - 1].timings[index];
+                  QualifyingResult qResult = qualifyingResults
+                      .singleWhere((a) => a.driver.driverId == timing.driverId);
                   String timingText = "";
                   if (timing.time != null) {
                     timingText = timing.time!;
@@ -110,7 +136,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
                             .difference(stringToTime(aheadTiming));
                         final milliseconds = diff.inMilliseconds;
                         timingText +=
-                            " ${milliseconds > 0 ? '+' : '-'}${(milliseconds / 1000).floor()}.${(milliseconds % 1000)}";
+                            " ${milliseconds > 0 ? '+' : ''}${(milliseconds / 1000).floor()}.${(milliseconds % 1000)}";
                       }
                     }
                   }
@@ -132,8 +158,15 @@ class RaceLapsViewState extends State<RaceLapsView> {
                           int.parse(a.lap) < currentLap)
                       .map((e) => e.lap)
                       .join(",");
+                  int diffPositionFromStart = 0;
+                  final startPosition = qResult.position;
+                  diffPositionFromStart =
+                      int.parse(timing.position!) - int.parse(startPosition);
                   return ListTile(
-                    title: Text(timing.driverId ?? "NA"),
+                    title: DriverName(
+                      constructor: qResult.constructor,
+                      driver: qResult.driver,
+                    ),
                     subtitle: Row(
                       children: [
                         Text(timingText),
@@ -141,6 +174,17 @@ class RaceLapsViewState extends State<RaceLapsView> {
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text("Pitstops: $driverPitstops")),
                       ],
+                    ),
+                    trailing: Text(
+                      diffPositionFromStart > 0
+                          ? "+$diffPositionFromStart"
+                          : "$diffPositionFromStart",
+                      style: TextStyle(
+                        color: diffPositionFromStart > 0
+                            ? Colors.green
+                            : Colors.red,
+                        fontSize: 30,
+                      ),
                     ),
                   );
                 },
@@ -160,7 +204,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
             ),
             IconButton(
               onPressed: () {
-                if (currentLap <= 1) {
+                if (currentLap <= 0) {
                   return;
                 }
                 setState(() {
@@ -171,7 +215,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
             ),
             Flexible(
               child: Slider(
-                min: 1,
+                min: 0,
                 max: laps.length.toDouble(),
                 divisions: laps.length,
                 value: currentLap.toDouble(),
