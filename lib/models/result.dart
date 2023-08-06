@@ -337,7 +337,7 @@ class ResultsRace extends Race {
 }
 
 class RaceLap {
-  String? number;
+  int number;
   List<Timing> timings;
 
   RaceLap({
@@ -347,7 +347,7 @@ class RaceLap {
 
   factory RaceLap.fromJson(Map<String, dynamic> json) {
     return RaceLap(
-      number: json['number'] == null ? null : json['number'] as String,
+      number: json['number'] == null ? 0 : int.parse(json['number'] as String),
       timings: json['Timings'] == null
           ? []
           : (json['Timings'] as List<dynamic>)
