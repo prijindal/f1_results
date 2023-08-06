@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import './serieshome.dart';
 import '../api/ergast.dart';
+import '../models/favorites.dart';
+import 'profile.dart';
 
 class SeriesListPage extends StatefulWidget {
   const SeriesListPage({super.key});
@@ -13,7 +15,6 @@ class SeriesListPage extends StatefulWidget {
 
 class _SeriesListPageState extends State<SeriesListPage> {
   List<String> seasons = [];
-  List<String> favorites = [];
   bool _isLoading = true;
 
   @override
@@ -22,18 +23,7 @@ class _SeriesListPageState extends State<SeriesListPage> {
     setState(() {
       _isLoading = true;
     });
-    _loadFavorites();
     _fetchSeries();
-  }
-
-  Future<void> _loadFavorites() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    final favorites = sharedPreferences.getStringList("favourites");
-    if (favorites != null) {
-      setState(() {
-        this.favorites = (favorites..sort()).reversed.toList();
-      });
-    }
   }
 
   Future<void> _fetchSeries() async {
@@ -47,10 +37,22 @@ class _SeriesListPageState extends State<SeriesListPage> {
 
   @override
   Widget build(BuildContext context) {
-    _loadFavorites();
+    final favouritesNotifier = Provider.of<FavouritesNotifier>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Race Series"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (BuildContext context) => const ProfileScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.person),
+          ),
+        ],
       ),
       body: _isLoading
           ? const LinearProgressIndicator()
@@ -59,7 +61,8 @@ class _SeriesListPageState extends State<SeriesListPage> {
                 ExpansionTile(
                   title: const Text("Favorites"),
                   initiallyExpanded: true,
-                  children: favorites
+                  children: favouritesNotifier
+                      .getFavourites()
                       .map(
                         (season) => _SeriesListTile(
                           season: season,

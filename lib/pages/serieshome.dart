@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/ergast.dart';
+import '../models/favorites.dart';
 import '../models/result.dart';
 import 'raceslist.dart';
 import 'standings.dart';
@@ -17,7 +19,6 @@ class SeriesHomePage extends StatefulWidget {
 
 class _SeriesHomePageState extends State<SeriesHomePage> {
   DateTime? _selectedDate;
-  List<String> favorites = [];
   int _selectedIndex = 0;
   List<Race> races = [];
   bool _isLoading = true;
@@ -50,26 +51,6 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
         _selectedDate = date;
       });
     }
-    final favorites = sharedPreferences.getStringList("favourites");
-    if (favorites != null) {
-      setState(() {
-        this.favorites = favorites;
-      });
-    }
-  }
-
-  Future<void> _setFavorite() async {
-    var favorites = this.favorites;
-    if (favorites.contains(widget.season)) {
-      favorites.remove(widget.season);
-    } else {
-      favorites.add(widget.season);
-    }
-    setState(() {
-      this.favorites = favorites;
-    });
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setStringList("favourites", favorites);
   }
 
   Future<void> _setSelectedDate(DateTime date) async {
@@ -120,6 +101,7 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final favouritesNotifier = Provider.of<FavouritesNotifier>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("${widget.season} Season"),
@@ -144,8 +126,12 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
             icon: const Icon(Icons.calendar_month),
           ),
           IconButton(
-            onPressed: _isLoading == true ? null : _setFavorite,
-            icon: favorites.contains(widget.season)
+            onPressed: _isLoading == true
+                ? null
+                : () {
+                    favouritesNotifier.toggleFavourite(widget.season);
+                  },
+            icon: favouritesNotifier.getFavourites().contains(widget.season)
                 ? const Icon(Icons.favorite)
                 : const Icon(Icons.favorite_border),
           ),
