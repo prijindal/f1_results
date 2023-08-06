@@ -262,8 +262,10 @@ class RaceLapsViewState extends State<RaceLapsView> {
 
                   timingText += " ${durationToText(diffToLeader)}";
                   final lap = _getLastValidLap(qResult.driver.driverId);
+                  String secondRow = "";
+                  secondRow += "Pitstops: $driverPitstops";
                   if (lap != null) {
-                    timingText += " Lap: ${lap.number}";
+                    secondRow += " Lap: ${lap.number}";
                   }
                   return ListTile(
                     leading: Text(
@@ -274,13 +276,9 @@ class RaceLapsViewState extends State<RaceLapsView> {
                       constructor: qResult.constructor,
                       driver: qResult.driver,
                     ),
-                    subtitle: Row(
-                      children: [
-                        Text(timingText),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Text("Pitstops: $driverPitstops")),
-                      ],
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [Text(timingText), Text(secondRow)],
                     ),
                     trailing: Text(
                       diffPositionFromStart > 0
