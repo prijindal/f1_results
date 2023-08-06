@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api/ergast.dart';
 import '../models/result.dart';
+import 'laps.dart';
 import 'qualifying.dart';
 import 'raceresult.dart';
 
@@ -47,6 +48,12 @@ class _RacePageState extends State<RacePage> {
         fetchRaceResult: fetchRaceResult,
       ),
     );
+    widgets.add(
+      RaceLapsView(
+        season: widget.season,
+        race: widget.race,
+      ),
+    );
     return widgets;
   }
 
@@ -72,10 +79,10 @@ class _RacePageState extends State<RacePage> {
             icon: Icon(Icons.flag_circle),
             label: 'Results',
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.flag),
-          //   label: 'Laps',
-          // ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.flag),
+            label: 'Laps',
+          ),
           // BottomNavigationBarItem(
           //   icon: Icon(Icons.car_rental),
           //   label: 'Pit Stops',

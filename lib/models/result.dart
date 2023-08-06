@@ -336,7 +336,66 @@ class ResultsRace extends Race {
   }
 }
 
+class RaceLap {
+  String? number;
+  List<Timing> timings;
+
+  RaceLap({
+    required this.number,
+    required this.timings,
+  });
+
+  factory RaceLap.fromJson(Map<String, dynamic> json) {
+    return RaceLap(
+      number: json['number'] == null ? null : json['number'] as String,
+      timings: json['Timings'] == null
+          ? []
+          : (json['Timings'] as List<dynamic>)
+              .map((timingJson) =>
+                  Timing.fromJson(timingJson as Map<String, dynamic>))
+              .toList(),
+    );
+  }
+}
+
+class Timing {
+  String? driverId;
+  String? position;
+  String? time;
+
+  Timing({
+    required this.driverId,
+    required this.position,
+    required this.time,
+  });
+
+  factory Timing.fromJson(Map<String, dynamic> json) {
+    return Timing(
+      driverId: json['driverId'] == null ? null : json['driverId'] as String,
+      position: json['position'] == null ? null : json['position'] as String,
+      time: json['time'] == null ? null : json['time'] as String,
+    );
+  }
+}
+
 DateTime stringToDate(String e) {
   final split = e.split("-").map((a) => int.parse(a)).toList();
   return DateTime(split[0], split[1], split[2]);
+}
+
+DateTime stringToTime(String e) {
+  final splitted = e.split(":");
+  int minutes = 0;
+  int seconds = 0;
+  int ms = 0;
+  if (splitted.length > 1) {
+    final secondsSplitted = splitted[splitted.length - 1].split(".");
+    minutes = int.parse(splitted[0]);
+    if (secondsSplitted.length > 1) {
+      seconds = int.parse(secondsSplitted[0]);
+      ms = int.parse(secondsSplitted[1]);
+    }
+  }
+  return DateTime.now()
+      .copyWith(minute: minutes, second: seconds, millisecond: ms);
 }
