@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/ergast.dart';
+import '../components/drivername.dart';
 import '../models/result.dart';
 
 class QualifyingList extends StatefulWidget {
@@ -40,8 +41,10 @@ class QualifyingListState extends State<QualifyingList> {
       itemCount: qualifyingResults.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(qualifyingResults[index].driver.code ??
-              qualifyingResults[index].driver.givenName),
+          title: DriverName(
+            driver: qualifyingResults[index].driver,
+            constructor: qualifyingResults[index].constructor,
+          ),
           subtitle: Text(qualifyingResults[index].bestTime),
         );
       },

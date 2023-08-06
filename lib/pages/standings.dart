@@ -112,7 +112,6 @@ class _StandingsListState extends State<StandingsList> {
         return ListTile(
           title: Text(constructorStandings[index].constructor.name),
           trailing: Text(constructorStandings[index].points.toString()),
-          onTap: () {},
         );
       },
     );
@@ -123,10 +122,10 @@ class _StandingsListState extends State<StandingsList> {
       itemCount: driverStandings.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(driverStandings[index].driver.givenName),
+          title: Text(
+              "${driverStandings[index].driver.givenName} ${driverStandings[index].driver.familyName}"),
           subtitle: Text(driverStandings[index].constructor.name),
           trailing: Text(driverStandings[index].points.toString()),
-          onTap: () {},
         );
       },
     );

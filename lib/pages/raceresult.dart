@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../components/drivername.dart';
 import '../models/result.dart';
 
 class RaceResultList extends StatefulWidget {
@@ -42,8 +43,10 @@ class RaceResultListState extends State<RaceResultList> {
       itemCount: raceResults.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(raceResults[index].driver.code ??
-              raceResults[index].driver.givenName),
+          title: DriverName(
+            driver: raceResults[index].driver,
+            constructor: raceResults[index].constructor,
+          ),
           subtitle: Text(raceResults[index].points),
         );
       },
