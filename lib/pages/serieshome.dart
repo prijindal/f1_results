@@ -17,6 +17,7 @@ class SeriesHomePage extends StatefulWidget {
 
 class _SeriesHomePageState extends State<SeriesHomePage> {
   DateTime? _selectedDate;
+  List<String> favorites = [];
   int _selectedIndex = 0;
   List<Race> races = [];
   bool _isLoading = true;
@@ -24,14 +25,14 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
   @override
   initState() {
     super.initState();
+    setState(() {
+      _isLoading = true;
+    });
     _loadSelectedDate();
     _fetchRaces();
   }
 
   Future<void> _fetchRaces() async {
-    setState(() {
-      _isLoading = true;
-    });
     final races = await fetchRaces(widget.season);
     setState(() {
       this.races = races;
@@ -40,14 +41,35 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
   }
 
   Future<void> _loadSelectedDate() async {
-    final dateString = (await SharedPreferences.getInstance())
-        .getString("selectedDate${widget.season}");
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final dateString =
+        sharedPreferences.getString("selectedDate${widget.season}");
     if (dateString != null) {
       final date = stringToDate(dateString);
       setState(() {
         _selectedDate = date;
       });
     }
+    final favorites = sharedPreferences.getStringList("favourites");
+    if (favorites != null) {
+      setState(() {
+        this.favorites = favorites;
+      });
+    }
+  }
+
+  Future<void> _setFavorite() async {
+    var favorites = this.favorites;
+    if (favorites.contains(widget.season)) {
+      favorites.remove(widget.season);
+    } else {
+      favorites.add(widget.season);
+    }
+    setState(() {
+      this.favorites = favorites;
+    });
+    final sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setStringList("favourites", favorites);
   }
 
   Future<void> _setSelectedDate(DateTime date) async {
@@ -120,7 +142,13 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
                     }
                   },
             icon: const Icon(Icons.calendar_month),
-          )
+          ),
+          IconButton(
+            onPressed: _isLoading == true ? null : _setFavorite,
+            icon: favorites.contains(widget.season)
+                ? const Icon(Icons.favorite)
+                : const Icon(Icons.favorite_border),
+          ),
         ],
       ),
       body: _isLoading
