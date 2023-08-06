@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'components/notransitiononweb.dart';
 import 'pages/series.dart';
 
 void main() {
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        pageTransitionsTheme: NoTransitionsOnWeb(),
       ),
       home: const SeriesListPage(),
     );
