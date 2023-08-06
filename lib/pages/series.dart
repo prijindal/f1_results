@@ -54,35 +54,34 @@ class _SeriesListPageState extends State<SeriesListPage> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const LinearProgressIndicator()
-          : ListView(
-              children: [
-                ExpansionTile(
-                  title: const Text("Favorites"),
-                  initiallyExpanded: true,
-                  children: favouritesNotifier
-                      .getFavourites()
-                      .map(
-                        (season) => _SeriesListTile(
-                          season: season,
-                        ),
-                      )
-                      .toList(),
-                ),
-                ExpansionTile(
-                  title: const Text("Seasons"),
-                  initiallyExpanded: true,
-                  children: seasons
-                      .map(
-                        (season) => _SeriesListTile(
-                          season: season,
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
-            ),
+      body: ListView(
+        children: [
+          if (_isLoading) const LinearProgressIndicator(),
+          ExpansionTile(
+            title: const Text("Favorites"),
+            initiallyExpanded: true,
+            children: favouritesNotifier
+                .getFavourites()
+                .map(
+                  (season) => _SeriesListTile(
+                    season: season,
+                  ),
+                )
+                .toList(),
+          ),
+          ExpansionTile(
+            title: const Text("Seasons"),
+            initiallyExpanded: true,
+            children: seasons
+                .map(
+                  (season) => _SeriesListTile(
+                    season: season,
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
     );
   }
 }

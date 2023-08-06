@@ -107,6 +107,49 @@ class RaceLapsViewState extends State<RaceLapsView> {
     });
   }
 
+  Timing getCurrentTiming(String driverId) {
+    return laps[currentLap - 1].timings.singleWhere(
+          (element) => element.driverId == driverId,
+          orElse: () => Timing(
+            driverId: driverId,
+            position: 999,
+            time: null,
+          ),
+        );
+  }
+
+  Duration _getCumulativeDiffToLeader(String driverId) {
+    final currentCumulative = cumulativeLapTimes[laps[currentLap - 1].number];
+    if (currentCumulative != null && currentCumulative[driverId] != null) {
+      return currentCumulative[driverId]!
+          .difference((currentCumulative.values.toList()..sort()).first);
+    }
+    return const Duration();
+  }
+
+  Duration _getDiffToLeader(String driverId) {
+    final timings = laps[currentLap - 1]
+        .timings
+        .where((element) => element.driverId == driverId);
+    if (timings.isNotEmpty) {
+      final timing = timings.first;
+      if (timing.time != null) {
+        final aheadTiming = laps[currentLap - 1].timings[0].time;
+        if (aheadTiming != null) {
+          final diff =
+              stringToTime(timing.time!).difference(stringToTime(aheadTiming));
+          return diff;
+        }
+      }
+    }
+    return const Duration();
+  }
+
+  String durationToText(Duration diff) {
+    final milliseconds = diff.inMilliseconds;
+    return "${milliseconds > 0 ? '+' : ''}${(milliseconds / 1000).floor()}.${(milliseconds % 1000)}";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -124,12 +167,21 @@ class RaceLapsViewState extends State<RaceLapsView> {
               child: ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: currentLap == 0
-                    ? qualifyingResults.length
-                    : laps[currentLap - 1].timings.length,
+                itemCount: qualifyingResults.length,
                 itemBuilder: (context, index) {
+                  final qResult = (qualifyingResults
+                    ..sort((a, b) {
+                      if (currentLap == 0) {
+                        return a.position.compareTo(b.position);
+                      }
+                      final currentTimingA =
+                          getCurrentTiming(a.driver.driverId);
+                      final currentTimingB =
+                          getCurrentTiming(b.driver.driverId);
+                      return currentTimingA.position
+                          .compareTo(currentTimingB.position);
+                    }))[index];
                   if (currentLap == 0) {
-                    final qResult = qualifyingResults[index];
                     return ListTile(
                       title: DriverName(
                         constructor: qResult.constructor,
@@ -137,44 +189,29 @@ class RaceLapsViewState extends State<RaceLapsView> {
                       ),
                     );
                   }
-                  final timing = laps[currentLap - 1].timings[index];
-                  QualifyingResult qResult = qualifyingResults
-                      .singleWhere((a) => a.driver.driverId == timing.driverId);
                   String timingText = "";
-                  if (timing.time != null) {
-                    timingText = timing.time!;
-                    if (index > 0) {
-                      final aheadTiming = laps[currentLap - 1].timings[0].time;
-                      if (aheadTiming != null) {
-                        final diff = stringToTime(timing.time!)
-                            .difference(stringToTime(aheadTiming));
-                        final milliseconds = diff.inMilliseconds;
-                        timingText +=
-                            " ${milliseconds > 0 ? '+' : ''}${(milliseconds / 1000).floor()}.${(milliseconds % 1000)}";
-                      }
-                    }
-                  }
-                  final diffToLeader = cumulativeLapTimes[
-                          laps[currentLap - 1].number]![timing.driverId]!
-                      .difference(
-                    (cumulativeLapTimes[laps[currentLap - 1].number]!
-                            .values
-                            .toList()
-                          ..sort())
-                        .first,
-                  );
-                  final milliseconds = diffToLeader.inMilliseconds;
-                  timingText +=
-                      " +${(milliseconds / 1000).floor()}.${(milliseconds % 1000)}";
+                  int diffPositionFromStart = 0;
                   final driverPitstops = pitstops
                       .where((a) =>
-                          (a.driverId == timing.driverId) &&
+                          (a.driverId == qResult.driver.driverId) &&
                           int.parse(a.lap) < currentLap)
                       .map((e) => e.lap)
                       .join(",");
-                  final startPosition = qResult.position;
-                  int diffPositionFromStart =
-                      int.parse(startPosition) - int.parse(timing.position!);
+                  final timings = laps[currentLap - 1].timings.where(
+                      (element) => element.driverId == qResult.driver.driverId);
+                  if (timings.isNotEmpty) {
+                    final timing = timings.first;
+                    if (timing.time != null) {
+                      timingText = timing.time!;
+                    }
+                    diffPositionFromStart = qResult.position - timing.position;
+                  }
+                  final diff = _getDiffToLeader(qResult.driver.driverId);
+                  timingText += " ${durationToText(diff)}";
+                  final diffToLeader =
+                      _getCumulativeDiffToLeader(qResult.driver.driverId);
+
+                  timingText += " ${durationToText(diffToLeader)}";
                   return ListTile(
                     title: DriverName(
                       constructor: qResult.constructor,

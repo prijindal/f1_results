@@ -1,6 +1,6 @@
 class RaceResult {
   final String number;
-  final String position;
+  final int position;
   final String positionText;
   final String points;
   final Driver driver;
@@ -26,7 +26,7 @@ class RaceResult {
   factory RaceResult.fromJson(Map<String, dynamic> json) {
     return RaceResult(
       number: json['number'] as String,
-      position: json['position'] as String,
+      position: int.parse(json['position'] as String),
       positionText: json['positionText'] as String,
       points: json['points'] as String,
       driver: Driver.fromJson(json['Driver'] as Map<String, dynamic>),
@@ -182,7 +182,7 @@ class RaceCircuit {
 
 class QualifyingResult {
   final String number;
-  final String position;
+  final int position;
   final Driver driver;
   final Constructor constructor;
   final String? q1;
@@ -206,7 +206,7 @@ class QualifyingResult {
   factory QualifyingResult.fromJson(Map<String, dynamic> json) {
     return QualifyingResult(
       number: json['number'] as String,
-      position: json['position'] as String,
+      position: int.parse(json['position'] as String),
       driver: Driver.fromJson(json['Driver'] as Map<String, dynamic>),
       constructor:
           Constructor.fromJson(json['Constructor'] as Map<String, dynamic>),
@@ -360,7 +360,7 @@ class RaceLap {
 
 class Timing {
   String? driverId;
-  String? position;
+  int position;
   String? time;
 
   Timing({
@@ -372,7 +372,7 @@ class Timing {
   factory Timing.fromJson(Map<String, dynamic> json) {
     return Timing(
       driverId: json['driverId'] == null ? null : json['driverId'] as String,
-      position: json['position'] == null ? null : json['position'] as String,
+      position: int.parse(json['position'] as String),
       time: json['time'] == null ? null : json['time'] as String,
     );
   }
