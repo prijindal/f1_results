@@ -46,13 +46,7 @@ jobs:
           echo "storePassword=$KEY_PASSWORD" >> android/key.properties
           echo "VERSION_CODE=$GITHUB_RUN_NUMBER" > android/version.properties
 
-      # - run: flutter build apk --release
       - run: flutter build appbundle --release
-      - uses: actions/upload-artifact@v3
-        with:
-          name: android
-          path: build/app/outputs
-          retention-days: 1
       - uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
@@ -61,6 +55,14 @@ jobs:
           status: completed
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           mappingFile: build/app/outputs/mapping/release/mapping.txt
+      - name: reset version code
+        run: echo "VERSION_CODE=$GITHUB_RUN_NUMBER" > android/version.properties
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v3
+        with:
+          name: android
+          path: build/app/outputs/apk
+          retention-days: 30
 
   linux:
     runs-on: ubuntu-latest
@@ -107,7 +109,7 @@ jobs:
         with:
           name: linux
           path: build/linux
-          retention-days: 1
+          retention-days: 30
 
   macos:
     runs-on: macos-latest
@@ -169,4 +171,4 @@ jobs:
         with:
           name: windows
           path: build/windows
-          retention-days: 1
+          retention-days: 30
