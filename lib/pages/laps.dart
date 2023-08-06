@@ -109,7 +109,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
 
   Duration _getCumulativeDiffToLeader(String driverId) {
     for (var i = currentLap - 1; i >= 0; i--) {
-      final currentCumulative = cumulativeLapTimes[laps[i].number];
+      final currentCumulative = cumulativeLapTimes[laps[i].number.toString()];
       if (currentCumulative != null && currentCumulative[driverId] != null) {
         return currentCumulative[driverId]!
             .difference((currentCumulative.values.toList()..sort()).first);
@@ -119,14 +119,19 @@ class RaceLapsViewState extends State<RaceLapsView> {
   }
 
   Duration _getDiffToLeader(String driverId) {
-    final timing = _getLastTiming(driverId);
-    if (timing != null) {
-      if (timing.time != null) {
-        final aheadTiming = laps[currentLap - 1].timings[0].time;
-        if (aheadTiming != null) {
-          final diff =
-              stringToTime(timing.time!).difference(stringToTime(aheadTiming));
-          return diff;
+    if (currentLap != 0) {
+      final timings = laps[currentLap - 1]
+          .timings
+          .where((element) => element.driverId == driverId);
+      if (timings.isNotEmpty) {
+        final timing = timings.first;
+        if (timing.time != null) {
+          final aheadTiming = laps[currentLap - 1].timings[0].time;
+          if (aheadTiming != null) {
+            final diff = stringToTime(timing.time!)
+                .difference(stringToTime(aheadTiming));
+            return diff;
+          }
         }
       }
     }
@@ -134,6 +139,13 @@ class RaceLapsViewState extends State<RaceLapsView> {
   }
 
   Timing _getCurrentTiming(String driverId) {
+    if (currentLap == 0) {
+      return Timing(
+        driverId: driverId,
+        position: 999,
+        time: null,
+      );
+    }
     return laps[currentLap - 1].timings.singleWhere(
           (element) => element.driverId == driverId,
           orElse: () => Timing(
@@ -186,11 +198,9 @@ class RaceLapsViewState extends State<RaceLapsView> {
   }
 
   String _lastLapTiming(String driverId) {
-    final timing = _getLastTiming(driverId);
-    if (timing != null) {
-      if (timing.time != null) {
-        return timing.time!;
-      }
+    final timing = _getCurrentTiming(driverId);
+    if (timing.time != null) {
+      return timing.time!;
     }
     return "";
   }
@@ -221,7 +231,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
 
   String durationToText(Duration diff) {
     final milliseconds = diff.inMilliseconds;
-    return "${milliseconds > 0 ? '+' : ''}${(milliseconds / 1000).floor()}.${(milliseconds % 1000)}";
+    return "${milliseconds >= 0 ? '+' : ''}${(milliseconds / 1000).toStringAsFixed(3)}";
   }
 
   @override
