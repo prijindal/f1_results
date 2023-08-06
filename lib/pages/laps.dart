@@ -138,7 +138,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
                       children: [
                         Text(timingText),
                         Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text("Pitstops: $driverPitstops")),
                       ],
                     ),
