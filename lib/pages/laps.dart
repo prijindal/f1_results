@@ -123,6 +123,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
             child: SingleChildScrollView(
               child: ListView.builder(
                 shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: currentLap == 0
                     ? qualifyingResults.length
                     : laps[currentLap - 1].timings.length,
@@ -206,13 +207,13 @@ class RaceLapsViewState extends State<RaceLapsView> {
         if (laps.isNotEmpty)
           Row(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ),
-                child: Text(
-                  currentLap.toString(),
-                  style: const TextStyle(fontSize: 24),
+              SizedBox(
+                width: 60,
+                child: Center(
+                  child: Text(
+                    currentLap.toString(),
+                    style: const TextStyle(fontSize: 24),
+                  ),
                 ),
               ),
               IconButton(
