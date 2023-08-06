@@ -18,10 +18,10 @@ class DriverName extends StatelessWidget {
       children: [
         Text("${driver.givenName} ${driver.familyName}"),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             constructor.name,
-            style: TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12),
           ),
         ),
       ],
