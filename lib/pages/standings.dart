@@ -50,6 +50,7 @@ class StandingsList extends StatefulWidget {
 class _StandingsListState extends State<StandingsList> {
   List<ConstructorStanding> constructorStandings = [];
   List<DriverStanding> driverStandings = [];
+  bool _isLoading = true;
 
   @override
   initState() {
@@ -58,6 +59,9 @@ class _StandingsListState extends State<StandingsList> {
   }
 
   Future<void> _fetchSeries() async {
+    setState(() {
+      _isLoading = true;
+    });
     final mainResults = await fetchResults(widget.season);
     final sprintResults = await fetchSprintResults(widget.season);
     final List<ResultsRace> results = [
@@ -102,6 +106,7 @@ class _StandingsListState extends State<StandingsList> {
             ..sort((a, b) => a.points.compareTo(b.points)))
           .reversed
           .toList();
+      _isLoading = false;
     });
   }
 
@@ -133,8 +138,10 @@ class _StandingsListState extends State<StandingsList> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.standingType == StandingType.constructor
-        ? _buildConstructors()
-        : _buildDrivers();
+    return _isLoading
+        ? const LinearProgressIndicator()
+        : widget.standingType == StandingType.constructor
+            ? _buildConstructors()
+            : _buildDrivers();
   }
 }

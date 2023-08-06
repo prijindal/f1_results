@@ -19,6 +19,7 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
   DateTime? _selectedDate;
   int _selectedIndex = 0;
   List<Race> races = [];
+  bool _isLoading = true;
 
   @override
   initState() {
@@ -28,9 +29,13 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
   }
 
   Future<void> _fetchRaces() async {
+    setState(() {
+      _isLoading = true;
+    });
     final races = await fetchRaces(widget.season);
     setState(() {
       this.races = races;
+      _isLoading = false;
     });
   }
 
@@ -118,7 +123,9 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
           )
         ],
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: _isLoading
+          ? const LinearProgressIndicator()
+          : _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(

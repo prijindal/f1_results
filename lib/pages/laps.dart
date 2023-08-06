@@ -26,13 +26,26 @@ class RaceLapsViewState extends State<RaceLapsView> {
   // this means that driver1 has taken 3:33 minutes to complete from lap 0 to lap 3
   Map<String, Map<String, DateTime>> cumulativeLapTimes = {};
   int currentLap = 0;
+  bool _isLoading = true;
 
   @override
   initState() {
     super.initState();
-    _fetchQualifyingResults();
-    _fetchLaps();
-    _fetchPitStops();
+    _fetchAll();
+  }
+
+  Future<void> _fetchAll() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await Future.wait([
+      _fetchQualifyingResults(),
+      _fetchLaps(),
+      _fetchPitStops(),
+    ]);
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _fetchQualifyingResults() async {
@@ -96,13 +109,13 @@ class RaceLapsViewState extends State<RaceLapsView> {
 
   @override
   Widget build(BuildContext context) {
-    if (laps.isEmpty) {
-      return const Center(
-        child: Text("No laps data found"),
-      );
-    }
     return Column(
       children: [
+        if (_isLoading) const LinearProgressIndicator(),
+        if (laps.isEmpty && !_isLoading)
+          const Center(
+            child: Text("No laps data found"),
+          ),
         if (laps.length >= currentLap &&
             currentLap >= 0 &&
             qualifyingResults.isNotEmpty)
@@ -190,55 +203,56 @@ class RaceLapsViewState extends State<RaceLapsView> {
               ),
             ),
           ),
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
+        if (laps.isNotEmpty)
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                ),
+                child: Text(
+                  currentLap.toString(),
+                  style: const TextStyle(fontSize: 24),
+                ),
               ),
-              child: Text(
-                currentLap.toString(),
-                style: const TextStyle(fontSize: 24),
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                if (currentLap <= 0) {
-                  return;
-                }
-                setState(() {
-                  currentLap = currentLap - 1;
-                });
-              },
-              icon: const Icon(Icons.remove),
-            ),
-            Flexible(
-              child: Slider(
-                min: 0,
-                max: laps.length.toDouble(),
-                divisions: laps.length,
-                value: currentLap.toDouble(),
-                label: currentLap.toString(),
-                onChanged: (newValue) {
+              IconButton(
+                onPressed: () {
+                  if (currentLap <= 0) {
+                    return;
+                  }
                   setState(() {
-                    currentLap = newValue.toInt();
+                    currentLap = currentLap - 1;
                   });
                 },
+                icon: const Icon(Icons.remove),
               ),
-            ),
-            IconButton(
-              onPressed: () {
-                if (currentLap >= laps.length) {
-                  return;
-                }
-                setState(() {
-                  currentLap = currentLap + 1;
-                });
-              },
-              icon: const Icon(Icons.add),
-            ),
-          ],
-        )
+              Flexible(
+                child: Slider(
+                  min: 0,
+                  max: laps.length.toDouble(),
+                  divisions: laps.length,
+                  value: currentLap.toDouble(),
+                  label: currentLap.toString(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      currentLap = newValue.toInt();
+                    });
+                  },
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  if (currentLap >= laps.length) {
+                    return;
+                  }
+                  setState(() {
+                    currentLap = currentLap + 1;
+                  });
+                },
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          )
       ],
     );
   }

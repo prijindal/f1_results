@@ -12,6 +12,7 @@ class SeriesListPage extends StatefulWidget {
 
 class _SeriesListPageState extends State<SeriesListPage> {
   List<String> seasons = [];
+  bool _isLoading = true;
 
   @override
   initState() {
@@ -20,10 +21,14 @@ class _SeriesListPageState extends State<SeriesListPage> {
   }
 
   Future<void> _fetchSeries() async {
+    setState(() {
+      _isLoading = true;
+    });
     await initCache();
     final seasons = await fetchSeries();
     setState(() {
       this.seasons = seasons;
+      _isLoading = false;
     });
   }
 
@@ -33,23 +38,25 @@ class _SeriesListPageState extends State<SeriesListPage> {
       appBar: AppBar(
         title: const Text("Race Series"),
       ),
-      body: ListView.builder(
-        itemCount: seasons.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(seasons[index]),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (BuildContext context) => SeriesHomePage(
-                    season: seasons[index],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
+      body: _isLoading
+          ? const LinearProgressIndicator()
+          : ListView.builder(
+              itemCount: seasons.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(seasons[index]),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => SeriesHomePage(
+                          season: seasons[index],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
     );
   }
 }

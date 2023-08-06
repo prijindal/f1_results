@@ -20,6 +20,7 @@ class QualifyingList extends StatefulWidget {
 
 class QualifyingListState extends State<QualifyingList> {
   List<QualifyingResult> qualifyingResults = [];
+  bool _isLoading = true;
 
   @override
   initState() {
@@ -28,26 +29,32 @@ class QualifyingListState extends State<QualifyingList> {
   }
 
   Future<void> _fetchQualifyingResults() async {
+    setState(() {
+      _isLoading = true;
+    });
     final qualifyingResults =
         await fetchQualifyingResults(widget.season, widget.race.round);
     setState(() {
       this.qualifyingResults = qualifyingResults;
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: qualifyingResults.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: DriverName(
-            driver: qualifyingResults[index].driver,
-            constructor: qualifyingResults[index].constructor,
-          ),
-          subtitle: Text(qualifyingResults[index].bestTime),
-        );
-      },
-    );
+    return _isLoading
+        ? const LinearProgressIndicator()
+        : ListView.builder(
+            itemCount: qualifyingResults.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: DriverName(
+                  driver: qualifyingResults[index].driver,
+                  constructor: qualifyingResults[index].constructor,
+                ),
+                subtitle: Text(qualifyingResults[index].bestTime),
+              );
+            },
+          );
   }
 }

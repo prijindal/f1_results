@@ -22,6 +22,7 @@ class RaceResultList extends StatefulWidget {
 
 class RaceResultListState extends State<RaceResultList> {
   List<RaceResult> raceResults = [];
+  bool _isLoading = true;
 
   @override
   initState() {
@@ -30,26 +31,32 @@ class RaceResultListState extends State<RaceResultList> {
   }
 
   Future<void> _fetchRaceResult() async {
+    setState(() {
+      _isLoading = true;
+    });
     final raceResults =
         await widget.fetchRaceResult(widget.season, widget.race.round);
     setState(() {
       this.raceResults = raceResults;
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: raceResults.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: DriverName(
-            driver: raceResults[index].driver,
-            constructor: raceResults[index].constructor,
-          ),
-          subtitle: Text(raceResults[index].points),
-        );
-      },
-    );
+    return _isLoading
+        ? const LinearProgressIndicator()
+        : ListView.builder(
+            itemCount: raceResults.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: DriverName(
+                  driver: raceResults[index].driver,
+                  constructor: raceResults[index].constructor,
+                ),
+                subtitle: Text(raceResults[index].points),
+              );
+            },
+          );
   }
 }
