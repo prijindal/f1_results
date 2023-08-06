@@ -85,7 +85,7 @@ class _SeriesListPageState extends State<SeriesListPage> {
 }
 
 class _SeriesListTile extends StatelessWidget {
-  const _SeriesListTile({super.key, required this.season});
+  const _SeriesListTile({required this.season});
 
   final String season;
 
