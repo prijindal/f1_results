@@ -1,6 +1,6 @@
 {
-    "name": "f1_results",
-    "short_name": "f1_results",
+    "name": "F1 Results No Spoiler info",
+    "short_name": "F1 Results",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
