@@ -42,6 +42,8 @@ dependencies:
   path_provider: ^2.0.15
   provider: ^6.0.5
   logger: ^2.0.1
+  quick_actions: ^1.0.5
+  easy_debounce: ^2.0.3
 
 dev_dependencies:
   flutter_test:

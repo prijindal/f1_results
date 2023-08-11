@@ -24,6 +24,7 @@ class _SeriesListPageState extends State<SeriesListPage> {
       _isLoading = true;
     });
     _fetchSeries();
+    handleQuickActions(context);
   }
 
   Future<void> _fetchSeries() async {

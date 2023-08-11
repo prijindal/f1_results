@@ -63,7 +63,7 @@ android {
     if ( item.contains("assembleRelease") || item.contains("bundleRelease")) {
         value = 1;
     }
-    def code = Integer.parseInt(versionProps['VERSION_CODE']  ?: "0" ).intValue() + value
+    def code = Integer.parseInt(versionProps['VERSION_CODE']  ?: "1" ).intValue() + value
     for (String item : runTasks)
     if ( item.contains("assembleRelease") || item.contains("bundleRelease")) {
         versionProps['VERSION_CODE']=code.toString()
