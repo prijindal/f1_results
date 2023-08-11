@@ -48,8 +48,7 @@ class StandingsList extends StatefulWidget {
 }
 
 class _StandingsListState extends State<StandingsList> {
-  List<ConstructorStanding> constructorStandings = [];
-  List<DriverStanding> driverStandings = [];
+  List<ResultsRace> resultsRace = [];
   bool _isLoading = true;
 
   @override
@@ -68,17 +67,44 @@ class _StandingsListState extends State<StandingsList> {
       ...mainResults,
       ...sprintResults,
     ];
+    setState(() {
+      resultsRace = results;
+      _isLoading = false;
+    });
+  }
+
+  List<ConstructorStanding> get constructorStandings {
     final Map<String, ConstructorStanding> constructorStandings = {};
-    final Map<String, DriverStanding> driverStandings = {};
-    for (var race in results) {
+    for (var race in resultsRace) {
       for (var result in race.allResults) {
         final constructor = result.constructor;
-        final driver = result.driver;
         if (constructorStandings[constructor.constructorId] == null) {
           constructorStandings[constructor.constructorId] = ConstructorStanding(
             constructor: constructor,
           );
         }
+      }
+    }
+    for (var race in resultsRace) {
+      if (widget.selectedDate.compareTo(stringToDate(race.date)) >= 0) {
+        for (var result in race.allResults) {
+          constructorStandings[result.constructor.constructorId]?.points +=
+              double.parse(result.points);
+        }
+      }
+    }
+    return (constructorStandings.values.toList()
+          ..sort((a, b) => a.points.compareTo(b.points)))
+        .reversed
+        .toList();
+  }
+
+  List<DriverStanding> get driverStandings {
+    final Map<String, DriverStanding> driverStandings = {};
+    for (var race in resultsRace) {
+      for (var result in race.allResults) {
+        final constructor = result.constructor;
+        final driver = result.driver;
         if (driverStandings[driver.driverId] == null) {
           driverStandings[driver.driverId] = DriverStanding(
             driver: driver,
@@ -87,27 +113,18 @@ class _StandingsListState extends State<StandingsList> {
         }
       }
     }
-    for (var race in results) {
+    for (var race in resultsRace) {
       if (widget.selectedDate.compareTo(stringToDate(race.date)) >= 0) {
         for (var result in race.allResults) {
-          constructorStandings[result.constructor.constructorId]?.points +=
-              double.parse(result.points);
           driverStandings[result.driver.driverId]?.points +=
               double.parse(result.points);
         }
       }
     }
-    setState(() {
-      this.constructorStandings = (constructorStandings.values.toList()
-            ..sort((a, b) => a.points.compareTo(b.points)))
-          .reversed
-          .toList();
-      this.driverStandings = (driverStandings.values.toList()
-            ..sort((a, b) => a.points.compareTo(b.points)))
-          .reversed
-          .toList();
-      _isLoading = false;
-    });
+    return (driverStandings.values.toList()
+          ..sort((a, b) => a.points.compareTo(b.points)))
+        .reversed
+        .toList();
   }
 
   Widget _buildConstructors() {
