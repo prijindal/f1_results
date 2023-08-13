@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -160,11 +162,30 @@ class RaceLapsViewState extends State<RaceLapsView> {
   }
 
   RaceLap? _getLastValidLap(String driverId, int currentLap) {
-    for (var i = currentLap - 1; i >= 0; i--) {
-      final timings =
-          laps[i].timings.where((element) => element.driverId == driverId);
-      if (timings.isNotEmpty) {
-        return laps[i];
+    int lappedLaps = 0;
+    if (currentLap > 0) {
+      final diff = _getCumulativeDiffToLeader(driverId, currentLap);
+      final leaderTimeString = laps[currentLap - 1].timings[0].time;
+      if (leaderTimeString != null) {
+        final leaderDiffFromZero = stringToTime(leaderTimeString)
+            .copyWith(
+              year: int.parse(widget.season),
+              month: 1,
+              day: 1,
+              hour: 0,
+            )
+            .difference(DateTime(int.parse(widget.season)));
+        if (diff > leaderDiffFromZero) {
+          lappedLaps =
+              (diff.inMilliseconds / leaderDiffFromZero.inMilliseconds).floor();
+        }
+      }
+      for (var i = max(0, currentLap - (1 + lappedLaps)); i >= 0; i--) {
+        final timings =
+            laps[i].timings.where((element) => element.driverId == driverId);
+        if (timings.isNotEmpty) {
+          return (laps[i]);
+        }
       }
     }
     return null;
