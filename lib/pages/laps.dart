@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../api/ergast.dart';
 import '../components/drivername.dart';
+import '../components/lapsslider.dart';
 import '../models/current_lap.dart';
 import '../models/result.dart';
+import 'driverlaps.dart';
 
 class RaceLapsView extends StatefulWidget {
   const RaceLapsView({
@@ -265,7 +267,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
                   final driverPitstops = pitstops
                       .where((a) =>
                           (a.driverId == qResult.driver.driverId) &&
-                          int.parse(a.lap) < currentLap)
+                          a.lap < currentLap)
                       .map((e) => e.lap)
                       .join(",");
                   timingText +=
@@ -308,63 +310,26 @@ class RaceLapsViewState extends State<RaceLapsView> {
                         fontSize: 30,
                       ),
                     ),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (context) => DriverLapsView(
+                            season: widget.season,
+                            race: widget.race,
+                            qualifyingResult: qResult,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
             ),
           ),
         if (laps.isNotEmpty)
-          Row(
-            children: [
-              SizedBox(
-                width: 60,
-                child: Center(
-                  child: Text(
-                    currentLap.toString(),
-                    style: const TextStyle(fontSize: 24),
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  if (currentLap <= 0) {
-                    return;
-                  }
-                  currentLapNotifier.setCurrentLap(
-                    widget.season,
-                    currentLap - 1,
-                  );
-                },
-                icon: const Icon(Icons.remove),
-              ),
-              Flexible(
-                child: Slider(
-                  min: 0,
-                  max: laps.length.toDouble(),
-                  divisions: laps.length,
-                  value: currentLap.toDouble(),
-                  label: currentLap.toString(),
-                  onChanged: (newValue) {
-                    currentLapNotifier.setCurrentLap(
-                      widget.season,
-                      newValue.toInt(),
-                    );
-                  },
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  if (currentLap >= laps.length) {
-                    return;
-                  }
-                  currentLapNotifier.setCurrentLap(
-                    widget.season,
-                    currentLap + 1,
-                  );
-                },
-                icon: const Icon(Icons.add),
-              ),
-            ],
+          LapSlider(
+            season: widget.season,
+            totalLaps: laps.length,
           )
       ],
     );

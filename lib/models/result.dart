@@ -380,7 +380,7 @@ class Timing {
 
 class PitStop {
   String driverId;
-  String lap;
+  int lap;
   String stop;
   String time;
   String duration;
@@ -396,7 +396,7 @@ class PitStop {
   factory PitStop.fromJson(Map<String, dynamic> json) {
     return PitStop(
       driverId: json["driverId"] as String,
-      lap: json["lap"] as String,
+      lap: int.parse(json["lap"] as String),
       stop: json["stop"] as String,
       time: json["time"] as String,
       duration: json["duration"] as String,
