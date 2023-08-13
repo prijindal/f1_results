@@ -4,82 +4,25 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../api/ergast.dart';
 import '../components/lapsslider.dart';
 import '../models/current_lap.dart';
 import '../models/result.dart';
 
-class DriverLapsView extends StatefulWidget {
+class DriverLapsView extends StatelessWidget {
   const DriverLapsView({
     super.key,
     required this.season,
     required this.race,
     required this.qualifyingResult,
+    required this.driverPitStops,
+    required this.driverTimings,
   });
 
   final String season;
   final Race race;
   final QualifyingResult qualifyingResult;
-
-  @override
-  State<DriverLapsView> createState() => DriverLapsViewState();
-}
-
-class DriverLapsViewState extends State<DriverLapsView> {
-  List<RaceLap> laps = [];
-  List<PitStop> pitstops = [];
-  bool _isLoading = true;
-
-  @override
-  initState() {
-    super.initState();
-    _fetchAll();
-  }
-
-  Future<void> _fetchAll() async {
-    setState(() {
-      _isLoading = true;
-    });
-    await Future.wait([
-      _fetchLaps(),
-      _fetchPitStops(),
-    ]);
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _fetchLaps() async {
-    final laps = await fetchLaps(widget.season, widget.race.round);
-    setState(() {
-      this.laps = laps;
-    });
-  }
-
-  Future<void> _fetchPitStops() async {
-    final pitstops = await fetchPitStops(widget.season, widget.race.round);
-    setState(() {
-      this.pitstops = pitstops;
-    });
-  }
-
-  List<PitStop> get _driverPitStops {
-    return pitstops
-        .where(
-          (element) =>
-              element.driverId == widget.qualifyingResult.driver.driverId,
-        )
-        .toList();
-  }
-
-  List<Timing> get _driverTimings {
-    final List<Timing> timings = [];
-    for (var lap in laps) {
-      timings.addAll(lap.timings.where((element) =>
-          element.driverId == widget.qualifyingResult.driver.driverId));
-    }
-    return timings;
-  }
+  final List<PitStop> driverPitStops;
+  final List<Timing> driverTimings;
 
   @override
   Widget build(BuildContext context) {
@@ -90,12 +33,12 @@ class DriverLapsViewState extends State<DriverLapsView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              "${widget.race.season} - ${widget.race.raceName}",
+              "${race.season} - ${race.raceName}",
             ),
             Visibility(
               visible: true,
               child: Text(
-                "${widget.qualifyingResult.driver.givenName} ${widget.qualifyingResult.driver.familyName}",
+                "${qualifyingResult.driver.givenName} ${qualifyingResult.driver.familyName}",
                 style: const TextStyle(
                   fontSize: 12.0,
                 ),
@@ -104,24 +47,24 @@ class DriverLapsViewState extends State<DriverLapsView> {
           ],
         ),
       ),
-      body: _isLoading ? const LinearProgressIndicator() : _buildBody(),
+      body: _buildBody(context),
     );
   }
 
   List<FlSpot> getSpots(int currentLap) {
     List<FlSpot> spots = [];
-    for (var i = 0; i < _driverTimings.length; i++) {
+    for (var i = 0; i < driverTimings.length; i++) {
       if (i < currentLap) {
-        final time = _driverTimings[i].time;
+        final time = driverTimings[i].time;
         if (time != null) {
           final diff = stringToTime(time)
               .copyWith(
-                year: int.parse(widget.season),
+                year: int.parse(season),
                 month: 1,
                 day: 1,
                 hour: 0,
               )
-              .difference(DateTime(int.parse(widget.season)));
+              .difference(DateTime(int.parse(season)));
           spots.add(FlSpot(
             (i + 1).toDouble(),
             diff.inMilliseconds.toDouble(),
@@ -132,14 +75,13 @@ class DriverLapsViewState extends State<DriverLapsView> {
     return spots;
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
     final currentLapNotifier = Provider.of<CurrentLapNotifier>(context);
-    final currentLap =
-        currentLapNotifier.getCurrentLap(widget.season, widget.race.round);
+    final currentLap = currentLapNotifier.getCurrentLap(season, race.round);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        if (_driverTimings.isEmpty)
+        if (driverTimings.isEmpty)
           const Center(
             child: Text("No lap data for this driver"),
           ),
@@ -148,16 +90,15 @@ class DriverLapsViewState extends State<DriverLapsView> {
             child: ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: min(_driverTimings.length, currentLap),
+              itemCount: min(driverTimings.length, currentLap),
               itemBuilder: (context, index) {
                 return ListTile(
                   leading: Text(
                     (index + 1).toString(),
                     style: const TextStyle(fontSize: 30),
                   ),
-                  title:
-                      Text(_driverTimings[index].time ?? "No lap data found"),
-                  trailing: _driverPitStops
+                  title: Text(driverTimings[index].time ?? "No lap data found"),
+                  trailing: driverPitStops
                           .where((element) => element.lap == (index + 1))
                           .isEmpty
                       ? null
@@ -203,7 +144,7 @@ class DriverLapsViewState extends State<DriverLapsView> {
                         );
                         final index = touchedSpot.x.toInt();
                         return LineTooltipItem(
-                          _driverTimings[index - 1].time ?? "NA",
+                          driverTimings[index - 1].time ?? "NA",
                           textStyle,
                         );
                       }).toList();
@@ -219,12 +160,15 @@ class DriverLapsViewState extends State<DriverLapsView> {
             ),
           ),
         ),
-        if (_driverTimings.isNotEmpty)
-          LapSlider(
-            season: widget.season,
-            round: widget.race.round,
-            totalLaps: _driverTimings.length,
-          )
+        if (driverTimings.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: LapSlider(
+              season: season,
+              round: race.round,
+              totalLaps: driverTimings.length,
+            ),
+          ),
       ],
     );
   }

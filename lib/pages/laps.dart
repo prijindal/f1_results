@@ -312,12 +312,25 @@ class RaceLapsViewState extends State<RaceLapsView> {
                       ),
                     ),
                     onTap: () {
+                      final List<Timing> timings = [];
+                      for (var lap in laps) {
+                        timings.addAll(lap.timings.where((element) =>
+                            element.driverId == qResult.driver.driverId));
+                      }
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (context) => DriverLapsView(
                             season: widget.season,
                             race: widget.race,
                             qualifyingResult: qResult,
+                            driverPitStops: pitstops
+                                .where(
+                                  (element) =>
+                                      element.driverId ==
+                                      qResult.driver.driverId,
+                                )
+                                .toList(),
+                            driverTimings: timings,
                           ),
                         ),
                       );
