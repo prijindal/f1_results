@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -107,6 +108,30 @@ class DriverLapsViewState extends State<DriverLapsView> {
     );
   }
 
+  List<FlSpot> getSpots(int currentLap) {
+    List<FlSpot> spots = [];
+    for (var i = 0; i < _driverTimings.length; i++) {
+      if (i < currentLap) {
+        final time = _driverTimings[i].time;
+        if (time != null) {
+          final diff = stringToTime(time)
+              .copyWith(
+                year: int.parse(widget.season),
+                month: 1,
+                day: 1,
+                hour: 0,
+              )
+              .difference(DateTime(int.parse(widget.season)));
+          spots.add(FlSpot(
+            (i + 1).toDouble(),
+            diff.inMilliseconds.toDouble(),
+          ));
+        }
+      }
+    }
+    return spots;
+  }
+
   Widget _buildBody() {
     final currentLapNotifier = Provider.of<CurrentLapNotifier>(context);
     final currentLap = currentLapNotifier.getCurrentLap(widget.season);
@@ -138,6 +163,58 @@ class DriverLapsViewState extends State<DriverLapsView> {
                       : const Text("Pit"),
                 );
               },
+            ),
+          ),
+        ),
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 48),
+            child: LineChart(
+              LineChartData(
+                titlesData: const FlTitlesData(
+                  show: true,
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                ),
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                      return touchedSpots.map((LineBarSpot touchedSpot) {
+                        final textStyle = TextStyle(
+                          color: touchedSpot.bar.gradient?.colors.first ??
+                              touchedSpot.bar.color ??
+                              Colors.blueGrey,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        );
+                        final index = touchedSpot.x.toInt();
+                        return LineTooltipItem(
+                          _driverTimings[index - 1].time ?? "NA",
+                          textStyle,
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: getSpots(currentLap),
+                  )
+                ],
+              ),
             ),
           ),
         ),

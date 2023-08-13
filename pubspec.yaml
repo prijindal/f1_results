@@ -44,6 +44,7 @@ dependencies:
   logger: ^2.0.1
   quick_actions: ^1.0.5
   easy_debounce: ^2.0.3
+  fl_chart: ^0.63.0
 
 dev_dependencies:
   flutter_test:
