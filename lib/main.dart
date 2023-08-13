@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'components/notransitiononweb.dart';
+import 'models/current_lap.dart';
 import 'models/favorites.dart';
 import 'models/theme.dart';
 import 'pages/series.dart';
@@ -22,6 +23,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<FavouritesNotifier>(
           create: (context) => FavouritesNotifier(),
+        ),
+        ChangeNotifierProvider<CurrentLapNotifier>(
+          create: (context) => CurrentLapNotifier(),
         ),
       ],
       child: const MyMaterialApp(),

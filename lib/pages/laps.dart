@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../api/ergast.dart';
 import '../components/drivername.dart';
+import '../models/current_lap.dart';
 import '../models/result.dart';
 
 class RaceLapsView extends StatefulWidget {
@@ -25,7 +27,6 @@ class RaceLapsViewState extends State<RaceLapsView> {
   // cumulativeLapTimes will store in format {"lap3": {"driver1": "3.33.333"}}
   // this means that driver1 has taken 3:33 minutes to complete from lap 0 to lap 3
   Map<String, Map<String, DateTime>> cumulativeLapTimes = {};
-  int currentLap = 0;
   bool _isLoading = true;
 
   @override
@@ -107,7 +108,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
     });
   }
 
-  Duration _getCumulativeDiffToLeader(String driverId) {
+  Duration _getCumulativeDiffToLeader(String driverId, int currentLap) {
     for (var i = currentLap - 1; i >= 0; i--) {
       final currentCumulative = cumulativeLapTimes[laps[i].number.toString()];
       if (currentCumulative != null && currentCumulative[driverId] != null) {
@@ -118,7 +119,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
     return const Duration();
   }
 
-  Duration _getDiffToLeader(String driverId) {
+  Duration _getDiffToLeader(String driverId, int currentLap) {
     if (currentLap != 0) {
       final timings = laps[currentLap - 1]
           .timings
@@ -138,7 +139,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
     return const Duration();
   }
 
-  Timing _getCurrentTiming(String driverId) {
+  Timing _getCurrentTiming(String driverId, int currentLap) {
     if (currentLap == 0) {
       return Timing(
         driverId: driverId,
@@ -156,7 +157,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
         );
   }
 
-  RaceLap? _getLastValidLap(String driverId) {
+  RaceLap? _getLastValidLap(String driverId, int currentLap) {
     for (var i = currentLap - 1; i >= 0; i--) {
       final timings =
           laps[i].timings.where((element) => element.driverId == driverId);
@@ -167,15 +168,15 @@ class RaceLapsViewState extends State<RaceLapsView> {
     return null;
   }
 
-  int? _getPosition(String driverId) {
-    final timing = _getLastTiming(driverId);
+  int? _getPosition(String driverId, int currentLap) {
+    final timing = _getLastTiming(driverId, currentLap);
     if (timing != null) {
       return timing.position;
     }
     return null;
   }
 
-  Timing? _getLastTiming(String driverId) {
+  Timing? _getLastTiming(String driverId, int currentLap) {
     for (var i = currentLap - 1; i >= 0; i--) {
       final timings =
           laps[i].timings.where((element) => element.driverId == driverId);
@@ -187,42 +188,42 @@ class RaceLapsViewState extends State<RaceLapsView> {
     return null;
   }
 
-  int _getPositionFromStart(String driverId) {
+  int _getPositionFromStart(String driverId, int currentLap) {
     final qResult = qualifyingResults
         .singleWhere((element) => element.driver.driverId == driverId);
-    final position = _getPosition(driverId);
+    final position = _getPosition(driverId, currentLap);
     if (position != null) {
       return qResult.position - position;
     }
     return 0;
   }
 
-  String _lastLapTiming(String driverId) {
-    final timing = _getCurrentTiming(driverId);
+  String _lastLapTiming(String driverId, int currentLap) {
+    final timing = _getCurrentTiming(driverId, currentLap);
     if (timing.time != null) {
       return timing.time!;
     }
     return "";
   }
 
-  int _positionCompare(QualifyingResult a, QualifyingResult b) {
+  int _positionCompare(QualifyingResult a, QualifyingResult b, int currentLap) {
     if (currentLap == 0) {
       return a.position.compareTo(b.position);
     }
-    final currentTimingA = _getCurrentTiming(a.driver.driverId);
-    final currentTimingB = _getCurrentTiming(b.driver.driverId);
+    final currentTimingA = _getCurrentTiming(a.driver.driverId, currentLap);
+    final currentTimingB = _getCurrentTiming(b.driver.driverId, currentLap);
     if (currentTimingA.position != currentTimingB.position) {
       return currentTimingA.position.compareTo(currentTimingB.position);
     }
-    final lastLapA = _getLastValidLap(a.driver.driverId);
-    final lastLapB = _getLastValidLap(b.driver.driverId);
+    final lastLapA = _getLastValidLap(a.driver.driverId, currentLap);
+    final lastLapB = _getLastValidLap(b.driver.driverId, currentLap);
     if (lastLapA != null &&
         lastLapB != null &&
         lastLapA.number != lastLapB.number) {
       return (-lastLapA.number).compareTo(-(lastLapB.number));
     }
-    final positionA = _getPosition(a.driver.driverId);
-    final positionB = _getPosition(b.driver.driverId);
+    final positionA = _getPosition(a.driver.driverId, currentLap);
+    final positionB = _getPosition(b.driver.driverId, currentLap);
     if (positionA != null && positionB != null) {
       return positionA.compareTo(positionB);
     }
@@ -236,6 +237,8 @@ class RaceLapsViewState extends State<RaceLapsView> {
 
   @override
   Widget build(BuildContext context) {
+    final currentLapNotifier = Provider.of<CurrentLapNotifier>(context);
+    final currentLap = currentLapNotifier.getCurrentLap(widget.season);
     return Column(
       children: [
         if (_isLoading) const LinearProgressIndicator(),
@@ -253,25 +256,29 @@ class RaceLapsViewState extends State<RaceLapsView> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: qualifyingResults.length,
                 itemBuilder: (context, index) {
-                  final qResult =
-                      (qualifyingResults..sort(_positionCompare))[index];
+                  final qResult = (qualifyingResults
+                    ..sort(
+                        (a, b) => _positionCompare(a, b, currentLap)))[index];
                   String timingText = "";
-                  int diffPositionFromStart =
-                      _getPositionFromStart(qResult.driver.driverId);
+                  int diffPositionFromStart = _getPositionFromStart(
+                      qResult.driver.driverId, currentLap);
                   final driverPitstops = pitstops
                       .where((a) =>
                           (a.driverId == qResult.driver.driverId) &&
                           int.parse(a.lap) < currentLap)
                       .map((e) => e.lap)
                       .join(",");
-                  timingText += _lastLapTiming(qResult.driver.driverId);
-                  final diff = _getDiffToLeader(qResult.driver.driverId);
+                  timingText +=
+                      _lastLapTiming(qResult.driver.driverId, currentLap);
+                  final diff =
+                      _getDiffToLeader(qResult.driver.driverId, currentLap);
                   timingText += " ${durationToText(diff)}";
-                  final diffToLeader =
-                      _getCumulativeDiffToLeader(qResult.driver.driverId);
+                  final diffToLeader = _getCumulativeDiffToLeader(
+                      qResult.driver.driverId, currentLap);
 
                   timingText += " ${durationToText(diffToLeader)}";
-                  final lap = _getLastValidLap(qResult.driver.driverId);
+                  final lap =
+                      _getLastValidLap(qResult.driver.driverId, currentLap);
                   String secondRow = "";
                   secondRow += "Pitstops: $driverPitstops";
                   if (lap != null) {
@@ -323,9 +330,10 @@ class RaceLapsViewState extends State<RaceLapsView> {
                   if (currentLap <= 0) {
                     return;
                   }
-                  setState(() {
-                    currentLap = currentLap - 1;
-                  });
+                  currentLapNotifier.setCurrentLap(
+                    widget.season,
+                    currentLap - 1,
+                  );
                 },
                 icon: const Icon(Icons.remove),
               ),
@@ -337,9 +345,10 @@ class RaceLapsViewState extends State<RaceLapsView> {
                   value: currentLap.toDouble(),
                   label: currentLap.toString(),
                   onChanged: (newValue) {
-                    setState(() {
-                      currentLap = newValue.toInt();
-                    });
+                    currentLapNotifier.setCurrentLap(
+                      widget.season,
+                      newValue.toInt(),
+                    );
                   },
                 ),
               ),
@@ -348,9 +357,10 @@ class RaceLapsViewState extends State<RaceLapsView> {
                   if (currentLap >= laps.length) {
                     return;
                   }
-                  setState(() {
-                    currentLap = currentLap + 1;
-                  });
+                  currentLapNotifier.setCurrentLap(
+                    widget.season,
+                    currentLap + 1,
+                  );
                 },
                 icon: const Icon(Icons.add),
               ),
