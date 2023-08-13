@@ -7,16 +7,18 @@ class LapSlider extends StatelessWidget {
   const LapSlider({
     super.key,
     required this.season,
+    required this.round,
     required this.totalLaps,
   });
 
   final String season;
+  final String round;
   final int totalLaps;
 
   @override
   Widget build(BuildContext context) {
     final currentLapNotifier = Provider.of<CurrentLapNotifier>(context);
-    final currentLap = currentLapNotifier.getCurrentLap(season);
+    final currentLap = currentLapNotifier.getCurrentLap(season, round);
     return Row(
       children: [
         SizedBox(
@@ -35,6 +37,7 @@ class LapSlider extends StatelessWidget {
             }
             currentLapNotifier.setCurrentLap(
               season,
+              round,
               currentLap - 1,
             );
           },
@@ -50,6 +53,7 @@ class LapSlider extends StatelessWidget {
             onChanged: (newValue) {
               currentLapNotifier.setCurrentLap(
                 season,
+                round,
                 newValue.toInt(),
               );
             },
@@ -62,6 +66,7 @@ class LapSlider extends StatelessWidget {
             }
             currentLapNotifier.setCurrentLap(
               season,
+              round,
               currentLap + 1,
             );
           },

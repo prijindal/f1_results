@@ -240,7 +240,8 @@ class RaceLapsViewState extends State<RaceLapsView> {
   @override
   Widget build(BuildContext context) {
     final currentLapNotifier = Provider.of<CurrentLapNotifier>(context);
-    final currentLap = currentLapNotifier.getCurrentLap(widget.season);
+    final currentLap =
+        currentLapNotifier.getCurrentLap(widget.season, widget.race.round);
     return Column(
       children: [
         if (_isLoading) const LinearProgressIndicator(),
@@ -329,6 +330,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
         if (laps.isNotEmpty)
           LapSlider(
             season: widget.season,
+            round: widget.race.round,
             totalLaps: laps.length,
           )
       ],

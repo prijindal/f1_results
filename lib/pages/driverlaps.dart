@@ -134,7 +134,8 @@ class DriverLapsViewState extends State<DriverLapsView> {
 
   Widget _buildBody() {
     final currentLapNotifier = Provider.of<CurrentLapNotifier>(context);
-    final currentLap = currentLapNotifier.getCurrentLap(widget.season);
+    final currentLap =
+        currentLapNotifier.getCurrentLap(widget.season, widget.race.round);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -221,6 +222,7 @@ class DriverLapsViewState extends State<DriverLapsView> {
         if (_driverTimings.isNotEmpty)
           LapSlider(
             season: widget.season,
+            round: widget.race.round,
             totalLaps: _driverTimings.length,
           )
       ],
