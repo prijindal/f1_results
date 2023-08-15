@@ -36,10 +36,12 @@ class RaceResultListState extends State<RaceResultList> {
     });
     final raceResults =
         await widget.fetchRaceResult(widget.season, widget.race.round);
-    setState(() {
-      this.raceResults = raceResults;
-      _isLoading = false;
-    });
+    if (context.mounted) {
+      setState(() {
+        this.raceResults = raceResults;
+        _isLoading = false;
+      });
+    }
   }
 
   @override

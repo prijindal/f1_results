@@ -30,10 +30,12 @@ class _SeriesListPageState extends State<SeriesListPage> {
   Future<void> _fetchSeries() async {
     await initCache();
     final seasons = await fetchSeries();
-    setState(() {
-      this.seasons = seasons;
-      _isLoading = false;
-    });
+    if (context.mounted) {
+      setState(() {
+        this.seasons = seasons;
+        _isLoading = false;
+      });
+    }
   }
 
   @override

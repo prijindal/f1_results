@@ -34,10 +34,12 @@ class QualifyingListState extends State<QualifyingList> {
     });
     final qualifyingResults =
         await fetchQualifyingResults(widget.season, widget.race.round);
-    setState(() {
-      this.qualifyingResults = qualifyingResults;
-      _isLoading = false;
-    });
+    if (context.mounted) {
+      setState(() {
+        this.qualifyingResults = qualifyingResults;
+        _isLoading = false;
+      });
+    }
   }
 
   @override

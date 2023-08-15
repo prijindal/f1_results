@@ -67,10 +67,12 @@ class _StandingsListState extends State<StandingsList> {
       ...mainResults,
       ...sprintResults,
     ];
-    setState(() {
-      resultsRace = results;
-      _isLoading = false;
-    });
+    if (context.mounted) {
+      setState(() {
+        resultsRace = results;
+        _isLoading = false;
+      });
+    }
   }
 
   List<ConstructorStanding> get constructorStandings {

@@ -35,13 +35,10 @@ class DriverLapsView extends StatelessWidget {
             Text(
               "${race.season} - ${race.raceName}",
             ),
-            Visibility(
-              visible: true,
-              child: Text(
-                "${qualifyingResult.driver.givenName} ${qualifyingResult.driver.familyName}",
-                style: const TextStyle(
-                  fontSize: 12.0,
-                ),
+            Text(
+              "${qualifyingResult.driver.givenName} ${qualifyingResult.driver.familyName}",
+              style: const TextStyle(
+                fontSize: 12.0,
               ),
             ),
           ],

@@ -35,10 +35,12 @@ class _SeriesHomePageState extends State<SeriesHomePage> {
 
   Future<void> _fetchRaces() async {
     final races = await fetchRaces(widget.season);
-    setState(() {
-      this.races = races;
-      _isLoading = false;
-    });
+    if (context.mounted) {
+      setState(() {
+        this.races = races;
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadSelectedDate() async {

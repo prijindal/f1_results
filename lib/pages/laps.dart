@@ -48,32 +48,40 @@ class RaceLapsViewState extends State<RaceLapsView> {
       _fetchLaps(),
       _fetchPitStops(),
     ]);
-    setState(() {
-      _isLoading = false;
-    });
+    if (context.mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _fetchQualifyingResults() async {
     final qualifyingResults =
         await fetchQualifyingResults(widget.season, widget.race.round);
-    setState(() {
-      this.qualifyingResults = qualifyingResults;
-    });
+    if (context.mounted) {
+      setState(() {
+        this.qualifyingResults = qualifyingResults;
+      });
+    }
   }
 
   Future<void> _fetchLaps() async {
     final laps = await fetchLaps(widget.season, widget.race.round);
-    setState(() {
-      this.laps = laps;
-    });
+    if (context.mounted) {
+      setState(() {
+        this.laps = laps;
+      });
+    }
     _calculateLapTimes();
   }
 
   Future<void> _fetchPitStops() async {
     final pitstops = await fetchPitStops(widget.season, widget.race.round);
-    setState(() {
-      this.pitstops = pitstops;
-    });
+    if (context.mounted) {
+      setState(() {
+        this.pitstops = pitstops;
+      });
+    }
   }
 
   Future<void> _calculateLapTimes() async {
@@ -107,9 +115,11 @@ class RaceLapsViewState extends State<RaceLapsView> {
       }
       cumulativeLapTimes[laps[k].number.toString()] = cumulativeDriverTime;
     }
-    setState(() {
-      this.cumulativeLapTimes = cumulativeLapTimes;
-    });
+    if (context.mounted) {
+      setState(() {
+        this.cumulativeLapTimes = cumulativeLapTimes;
+      });
+    }
   }
 
   Duration _getCumulativeDiffToLeader(String driverId, int currentLap) {
