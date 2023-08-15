@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../api/ergast.dart';
+import '../components/driverlapchart.dart';
 import '../components/drivername.dart';
 import '../components/lapsslider.dart';
 import '../models/current_lap.dart';
 import '../models/result.dart';
 import 'driverlaps.dart';
+import 'driverlapsdiff.dart';
 
 class RaceLapsView extends StatefulWidget {
   const RaceLapsView({
@@ -32,6 +34,7 @@ class RaceLapsViewState extends State<RaceLapsView> {
   // this means that driver1 has taken 3:33 minutes to complete from lap 0 to lap 3
   Map<String, Map<String, DateTime>> cumulativeLapTimes = {};
   bool _isLoading = true;
+  List<String> _selectedDrivers = [];
 
   @override
   initState() {
@@ -268,6 +271,27 @@ class RaceLapsViewState extends State<RaceLapsView> {
     return "${milliseconds >= 0 ? '+' : ''}${(milliseconds / 1000).toStringAsFixed(3)}";
   }
 
+  void _selectDriver(String driverId) {
+    final selectedDrivers = _selectedDrivers.toList();
+    if (selectedDrivers.contains(driverId)) {
+      selectedDrivers.remove(driverId);
+    } else {
+      selectedDrivers.add(driverId);
+    }
+    setState(() {
+      _selectedDrivers = selectedDrivers;
+    });
+  }
+
+  List<Timing> _getDriverTimings(String driverId) {
+    final List<Timing> timings = [];
+    for (var lap in laps) {
+      timings
+          .addAll(lap.timings.where((element) => element.driverId == driverId));
+    }
+    return timings;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentLapNotifier = Provider.of<CurrentLapNotifier>(context);
@@ -323,6 +347,8 @@ class RaceLapsViewState extends State<RaceLapsView> {
                       (index + 1).toString(),
                       style: const TextStyle(fontSize: 30),
                     ),
+                    selected:
+                        _selectedDrivers.contains(qResult.driver.driverId),
                     title: DriverName(
                       constructor: qResult.constructor,
                       driver: qResult.driver,
@@ -343,10 +369,9 @@ class RaceLapsViewState extends State<RaceLapsView> {
                       ),
                     ),
                     onTap: () {
-                      final List<Timing> timings = [];
-                      for (var lap in laps) {
-                        timings.addAll(lap.timings.where((element) =>
-                            element.driverId == qResult.driver.driverId));
+                      if (_selectedDrivers.isNotEmpty) {
+                        _selectDriver(qResult.driver.driverId);
+                        return;
                       }
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -361,15 +386,49 @@ class RaceLapsViewState extends State<RaceLapsView> {
                                       qResult.driver.driverId,
                                 )
                                 .toList(),
-                            driverTimings: timings,
+                            driverTimings:
+                                _getDriverTimings(qResult.driver.driverId),
                           ),
                         ),
                       );
+                    },
+                    onLongPress: () {
+                      _selectDriver(qResult.driver.driverId);
                     },
                   );
                 },
               ),
             ),
+          ),
+        if (_selectedDrivers.isNotEmpty)
+          TextButton(
+            onPressed: () {
+              final Map<String, TimingGraphData> driverTimingsArray = {};
+              final List<Color> availableColors = [
+                Colors.green,
+                Colors.red,
+                Colors.amber,
+                Colors.blue,
+                Colors.deepOrange
+              ];
+              for (var i = 0; i < _selectedDrivers.length; i++) {
+                final selectedDriver = _selectedDrivers[i];
+                driverTimingsArray[selectedDriver] = TimingGraphData(
+                  timing: _getDriverTimings(selectedDriver),
+                  color: i < availableColors.length ? availableColors[i] : null,
+                );
+              }
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => DriverLapsDifference(
+                    season: widget.season,
+                    race: widget.race,
+                    driverTimingsArray: driverTimingsArray,
+                  ),
+                ),
+              );
+            },
+            child: const Text("Difference"),
           ),
         if (laps.isNotEmpty)
           LapSlider(
