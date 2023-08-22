@@ -42,10 +42,13 @@ class _StandingsListState extends State<StandingsList> {
     });
     final mainResults = await fetchResults(widget.season);
     final sprintResults = await fetchSprintResults(widget.season);
-    final List<ResultsRace> results = [
+    final List<ResultsRace> results = ([
       ...mainResults,
       ...sprintResults,
-    ];
+    ]..sort((a, b) {
+            return a.date.compareTo(b.date);
+          }))
+        .toList();
     if (context.mounted) {
       setState(() {
         resultsRace = results;
