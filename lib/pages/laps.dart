@@ -118,6 +118,38 @@ class RaceLapsViewState extends State<RaceLapsView> {
       }
       cumulativeLapTimes[laps[k].number.toString()] = cumulativeDriverTime;
     }
+    for (var lap in laps) {
+      for (var timing in lap.timings) {
+        var newQualifyingResults = qualifyingResults.toList();
+        final matchedQualifyingResults = qualifyingResults
+            .where((element) => element.driver.driverId == timing.driverId);
+        if (matchedQualifyingResults.isEmpty) {
+          newQualifyingResults.add(
+            QualifyingResult(
+              number: "0",
+              position: newQualifyingResults.length,
+              driver: Driver(
+                driverId: timing.driverId!,
+                permanentNumber: null,
+                code: null,
+                url: null,
+                givenName: null,
+                familyName: null,
+                dateOfBirth: null,
+                nationality: null,
+              ),
+              constructor: null,
+              q1: null,
+              q2: null,
+              q3: null,
+            ),
+          );
+        }
+        setState(() {
+          qualifyingResults = newQualifyingResults;
+        });
+      }
+    }
     if (context.mounted) {
       setState(() {
         this.cumulativeLapTimes = cumulativeLapTimes;

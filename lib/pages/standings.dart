@@ -154,8 +154,7 @@ class _StandingsListState extends State<StandingsList> {
             (index + 1).toString(),
             style: const TextStyle(fontSize: 30),
           ),
-          title: Text(
-              "${driverStandings[index].driver.givenName} ${driverStandings[index].driver.familyName}"),
+          title: Text(driverStandings[index].driver.driverName),
           subtitle: Text(driverStandings[index].constructor.name),
           trailing: Text(driverStandings[index].points.toString()),
         );

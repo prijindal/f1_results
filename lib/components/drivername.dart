@@ -10,20 +10,21 @@ class DriverName extends StatelessWidget {
   });
 
   final Driver driver;
-  final Constructor constructor;
+  final Constructor? constructor;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text("${driver.givenName} ${driver.familyName}"),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            constructor.name,
-            style: const TextStyle(fontSize: 12),
+        Text(driver.driverName),
+        if (constructor != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              constructor!.name,
+              style: const TextStyle(fontSize: 12),
+            ),
           ),
-        ),
       ],
     );
   }

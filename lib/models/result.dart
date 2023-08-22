@@ -46,11 +46,11 @@ class Driver {
   final String driverId;
   final String? permanentNumber;
   final String? code;
-  final String url;
-  final String givenName;
-  final String familyName;
-  final String dateOfBirth;
-  final String nationality;
+  final String? url;
+  final String? givenName;
+  final String? familyName;
+  final String? dateOfBirth;
+  final String? nationality;
 
   Driver({
     required this.driverId,
@@ -62,6 +62,13 @@ class Driver {
     required this.dateOfBirth,
     required this.nationality,
   });
+
+  String get driverName {
+    if (givenName != null && familyName != null) {
+      return "$givenName $familyName";
+    }
+    return driverId;
+  }
 
   factory Driver.fromJson(Map<String, dynamic> json) {
     return Driver(
@@ -184,7 +191,7 @@ class QualifyingResult {
   final String number;
   final int position;
   final Driver driver;
-  final Constructor constructor;
+  final Constructor? constructor;
   final String? q1;
   final String? q2;
   final String? q3;
@@ -208,8 +215,9 @@ class QualifyingResult {
       number: json['number'] as String,
       position: int.parse(json['position'] as String),
       driver: Driver.fromJson(json['Driver'] as Map<String, dynamic>),
-      constructor:
-          Constructor.fromJson(json['Constructor'] as Map<String, dynamic>),
+      constructor: json['Constructor'] == null
+          ? null
+          : Constructor.fromJson(json['Constructor'] as Map<String, dynamic>),
       q1: json['Q1'] == null ? null : json['Q1'] as String,
       q2: json['Q2'] == null ? null : json['Q2'] as String,
       q3: json['Q3'] == null ? null : json['Q3'] as String,
