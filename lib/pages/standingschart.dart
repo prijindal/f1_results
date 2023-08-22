@@ -23,7 +23,6 @@ class DriverStandingsChart extends StatelessWidget {
 
   List<FlSpot> _getSpots(List<double> driverStandings) {
     List<FlSpot> spots = [];
-    print(driverStandings);
     for (var i = 0; i < driverStandings.length; i++) {
       final point = driverStandings[i];
       spots.add(FlSpot(
