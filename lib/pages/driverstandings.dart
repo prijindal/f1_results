@@ -74,7 +74,7 @@ class _DriverStandingsListState extends State<DriverStandingsList> {
     });
   }
 
-  List<double> _getDriverPoints(String driverId) {
+  List<double> _getDriverCumulativePoints(String driverId) {
     final List<double> points = [];
     double totalPoints = 0;
     for (var race in widget.resultsRace) {
@@ -88,6 +88,23 @@ class _DriverStandingsListState extends State<DriverStandingsList> {
         }
         totalPoints += point;
         points.add(totalPoints);
+      }
+    }
+    return points;
+  }
+
+  List<double> _getDriverPoints(String driverId) {
+    final List<double> points = [];
+    for (var race in widget.resultsRace) {
+      // result
+      if (widget.selectedDate.compareTo(stringToDate(race.date)) >= 0) {
+        double point = 0;
+        for (final result in race.allResults) {
+          if (result.driver.driverId == driverId) {
+            point += double.parse(result.points);
+          }
+        }
+        points.add(point);
       }
     }
     return points;
@@ -125,6 +142,8 @@ class _DriverStandingsListState extends State<DriverStandingsList> {
                           season: widget.season,
                           driverStandingsChartData: {
                             standing.driver.driverId: DriverStandingGraphData(
+                              cumulativePoints: _getDriverCumulativePoints(
+                                  standing.driver.driverId),
                               points:
                                   _getDriverPoints(standing.driver.driverId),
                               color: Colors.green,
@@ -158,6 +177,7 @@ class _DriverStandingsListState extends State<DriverStandingsList> {
                 final selectedDriver = _selectedDrivers[i];
                 driverStandingsChartArray[selectedDriver] =
                     DriverStandingGraphData(
+                  cumulativePoints: _getDriverCumulativePoints(selectedDriver),
                   points: _getDriverPoints(selectedDriver),
                   color: i < availableColors.length ? availableColors[i] : null,
                 );
