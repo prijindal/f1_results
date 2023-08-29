@@ -7,7 +7,7 @@ import '../models/result.dart';
 
 final dio = Dio();
 
-const rootApi = "https://ergast.com/api/f1";
+const rootApi = "http://ergast.com/api/f1";
 
 Future<void> initCache() async {
   String? dir;
